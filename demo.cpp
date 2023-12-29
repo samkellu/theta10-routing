@@ -1,36 +1,63 @@
 #include <SDL2/SDL.h>
-#include <SDL2/SDL_syswm.h>
 
-int main(int argc, char** argv) {
-	
-	if (SDL_Init(SDL_INIT_EVERYTHING) != 0) {
-		fprintf(stderr, "error initialising SDL: %s\n", SDL_GetError());
+#define CONE_LENGTH 200
+#define PI 3.14159
+
+int main() {
+
+    if(SDL_Init(SDL_INIT_VIDEO) != 0) {
+        fprintf(stderr, "Could not init SDL: %s\n", SDL_GetError());
+        return 1;
+    }
+
+    SDL_Window* win = SDL_CreateWindow("THETA-10 DEMO", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, 1000, 1000, 0);
+    if(!win) {
+        fprintf(stderr, "Could not create window\n");
+        return 1;
+    }
+
+    SDL_Renderer *renderer = SDL_CreateRenderer(win, -1, SDL_RENDERER_SOFTWARE);
+    if(!renderer) {
+        fprintf(stderr, "Could not create renderer\n");
+        return 1;
+    }
+
+	SDL_Event e;
+	int x, y;
+	bool running = true;
+	while (running) {
+
+		SDL_Delay(1000);
+		while (SDL_PollEvent(&e)) {
+
+			switch (e.type) {
+				case SDL_QUIT:
+					running = false;
+					break;
+
+				case SDL_MOUSEMOTION:
+					SDL_GetMouseState(&x, &y);
+					break;
+			}
+		}
+
+		printf("Mx %d My %d\n", x, y);
+		SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
+		SDL_RenderClear(renderer);
+
+		SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
+		for (int i = 0; i < 10; i++) {
+
+			float theta = (i/(float) 10) * 2 * PI; 
+			int vx = CONE_LENGTH * cos(theta);
+			int vy = CONE_LENGTH * sin(theta);
+			SDL_RenderDrawLine(renderer, x, y, x + vx, y + vy);
+		}
+		SDL_RenderPresent(renderer);
 	}
-	SDL_Window* win = SDL_CreateWindow("DEMO", SDL_WINDOWPOS_CENTERED,
-					   SDL_WINDOWPOS_CENTERED, 1000, 1000, 0);
 
-	if (!win) {
-		fprintf(stderr, "Failed to initialise window! Exitting...\n");
-		return -1;
-	}
-
-	SDL_SysWMinfo inf;
-	SDL_GetWindowWMInfo(win, &inf);
-	if (inf.subsystem == SDL_SYSWM_WAYLAND) {
-		printf("Is wayland\n");
-	}
-
-	SDL_Surface* surface = SDL_GetWindowSurface(win);
-	SDL_FillRect(surface, NULL, SDL_MapRGB(surface->format, 0xFF, 0xFF, 0xFF));
-	SDL_UpdateWindowSurface(win);
-	SDL_Delay(10000);
-
-	SDL_DestroyWindow(win);
-	SDL_Quit();
-
-	// while(1) {
-	// 	printf("Sup mate\n");
-	// }
-	return 0;
+    SDL_DestroyWindow(win);
+    SDL_Quit();
+    return 0;
 }
 
