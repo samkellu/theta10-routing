@@ -1,8 +1,11 @@
 #include <SDL2/SDL.h>
+#include <stdlib.h>
+#include <time.h>
 
 #define CONE_LENGTH 1000
 #define NUM_CONES 10
 #define NUM_POINTS 25
+#define NUM_OBSTACLES 8
 #define PI 3.14159
 
 int main() {
@@ -27,8 +30,17 @@ int main() {
 	SDL_Delay(1000);
 
 	int points[NUM_POINTS][2];
+	int obstacles[NUM_OBSTACLES][4];
 	int cur_point = 0;
 	int num_points = 0;
+
+	srand(time(NULL));
+	for (int i = 0; i < NUM_OBSTACLES; i++) {
+		obstacles[i][0] = rand()%1000;
+		obstacles[i][1] = rand()%1000;
+		obstacles[i][2] = rand()%1000;
+		obstacles[i][3] = rand()%1000;
+	}
 
 	SDL_Event e;
 	int x, y;
@@ -57,7 +69,7 @@ int main() {
 			}
 		}
 
-		SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
+		SDL_SetRenderDrawColor(renderer, 0, 0, 0, 50);
 		SDL_RenderClear(renderer);
 
 		for (int i = 0; i < NUM_CONES; i++) {
@@ -71,12 +83,10 @@ int main() {
 			for (int j = 0; j < num_points; j++) {
 
 				float alpha = atan2(y - points[j][1], x - points[j][0]);
-				// alpha *= alpha < 0 ? -1 : 1;
 				
 				if (alpha < thetaN && alpha >= theta) {
 					float distance = sqrt(pow(points[j][0] - x, 2) + pow(points[j][1] - y, 2));
 					if (distance < min_dist || min_idx == -1) {
-						printf("%d %d %f < %f < %f\n", i, min_idx, theta, alpha, thetaN);
 						min_dist = distance;
 						min_idx = j;
 					}
@@ -92,11 +102,19 @@ int main() {
 			}
 
 		}
-		printf("\n");
 
 		SDL_SetRenderDrawColor(renderer, 255, 255, 255, 50);
 		for (int i = 0; i < NUM_POINTS; i++) {
 			SDL_RenderDrawPoint(renderer, points[i][0], points[i][1]);
+		}
+
+		SDL_SetRenderDrawColor(renderer, 0, 255, 0, 50);
+		for (int i = 0; i < NUM_OBSTACLES; i++) {
+			int x = obstacles[i][0];
+			int y = obstacles[i][1];
+			int dx = x - obstacles[i][2];
+			int dy = y - obstacles[i][3];
+			SDL_RenderDrawLine(renderer, x, y, dx, dy);
 		}
 		SDL_RenderPresent(renderer);
 	}
