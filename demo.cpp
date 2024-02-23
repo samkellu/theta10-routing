@@ -36,10 +36,14 @@ int main() {
 
 	srand(time(NULL));
 	for (int i = 0; i < NUM_OBSTACLES; i++) {
-		obstacles[i][0] = rand()%1000;
-		obstacles[i][1] = rand()%1000;
-		obstacles[i][2] = rand()%1000;
-		obstacles[i][3] = rand()%1000;
+		int x1 = rand()%1000;
+		int x2 = rand()%1000;
+		int y1 = rand()%1000;
+		int y2 = rand()%1000;
+		obstacles[i][0] = x1;
+		obstacles[i][1] = y1;
+		obstacles[i][2] = x2;
+		obstacles[i][3] = y2;
 	}
 
 	SDL_Event e;
@@ -82,11 +86,41 @@ int main() {
 			float min_dist = pow(2, 31);
 			for (int j = 0; j < num_points; j++) {
 
-				float alpha = atan2(y - points[j][1], x - points[j][0]);
+				int x4 = points[j][0];
+				int y4 = points[j][1];
+				int x3 = x;
+				int y3 = y;
+
+				float alpha = atan2(y4 - y3, x4 - x3);
 				
 				if (alpha < thetaN && alpha >= theta) {
+					float closest_wall = pow(2, 31);
+					for (int i = 0; i < NUM_OBSTACLES; i++) {
+						int x1 = obstacles[i][0];
+						int y1 = obstacles[i][1];
+						int x2 = obstacles[i][2];
+						int y2 = obstacles[i][3];
+
+						float denominator = (x1-x2)*(y3-y4)-(y1-y2)*(x3-x4);
+
+						// vectors do not ever intersect
+						if (denominator == 0) continue;
+
+						float t = ((x1-x3)*(y3-y4)-(y1-y3)*(x3-x4))/denominator;
+						float u = -((x1-x2)*(y1-y3)-(y1-y2)*(x1-x3))/denominator;
+
+						// Case where the vectors intersect
+						if (t > 0 && t < 1 && u > 0) {
+
+							int px = x1 + t * (x2 - x1);
+							int py = y1 + t * (y2 - y1);
+							float int_dist = sqrt(pow(py-y1, 2) + pow(px-x1, 2));
+							closest_wall = std::min(closest_wall, int_dist);
+						}
+					}
+
 					float distance = sqrt(pow(points[j][0] - x, 2) + pow(points[j][1] - y, 2));
-					if (distance < min_dist || min_idx == -1) {
+					if (distance < min_dist && distance < closest_wall) {
 						min_dist = distance;
 						min_idx = j;
 					}
@@ -110,11 +144,11 @@ int main() {
 
 		SDL_SetRenderDrawColor(renderer, 0, 255, 0, 50);
 		for (int i = 0; i < NUM_OBSTACLES; i++) {
-			int x = obstacles[i][0];
-			int y = obstacles[i][1];
-			int dx = x - obstacles[i][2];
-			int dy = y - obstacles[i][3];
-			SDL_RenderDrawLine(renderer, x, y, dx, dy);
+			int x1 = obstacles[i][0];
+			int y1 = obstacles[i][1];
+			int x2 = obstacles[i][2];
+			int y2 = obstacles[i][3];
+			SDL_RenderDrawLine(renderer, x1, y1, x2, y2);
 		}
 		SDL_RenderPresent(renderer);
 	}
