@@ -8,6 +8,15 @@
 #define NUM_OBSTACLES 8
 #define PI 3.14159
 
+struct vec2 {
+	float x;
+	float y;
+};
+
+struct obstacle {
+	vec2 points[2];
+};
+
 int main() {
 
     if(SDL_Init(SDL_INIT_VIDEO) != 0) {
@@ -29,25 +38,22 @@ int main() {
 
 	SDL_Delay(1000);
 
-	int points[NUM_POINTS][2];
-	int obstacles[NUM_OBSTACLES][4];
+	vec2 points[NUM_POINTS];
+	obstacle obstacles[NUM_OBSTACLES];
 	int cur_point = 0;
 	int num_points = 0;
 
 	srand(time(NULL));
 	for (int i = 0; i < NUM_OBSTACLES; i++) {
-		int x1 = rand()%1000;
-		int x2 = rand()%1000;
-		int y1 = rand()%1000;
-		int y2 = rand()%1000;
-		obstacles[i][0] = x1;
-		obstacles[i][1] = y1;
-		obstacles[i][2] = x2;
-		obstacles[i][3] = y2;
+		obstacles[i] = {(float) (rand() % 1000),
+						(float) (rand() % 1000),
+						(float) (rand() % 1000),
+						(float) (rand() % 1000)};
 	}
 
 	SDL_Event e;
-	int x, y;
+	// mouse coords
+	int x3, y3;
 	bool running = true;
 	while (running) {
 
@@ -60,13 +66,13 @@ int main() {
 					break;
 
 				case SDL_MOUSEMOTION:
-					SDL_GetMouseState(&x, &y);
+					SDL_GetMouseState(&x3, &y3);
 					break;
 
 				case SDL_MOUSEBUTTONDOWN:
-					SDL_GetMouseState(&x, &y);
-					points[cur_point][0] = x;
-					points[cur_point][1] = y;
+					SDL_GetMouseState(&x3, &y3);
+					points[cur_point].x = x3;
+					points[cur_point].y = y3;
 					cur_point = (cur_point + 1) % NUM_POINTS;
 					num_points = num_points + 1 > NUM_POINTS ? NUM_POINTS : num_points + 1;
 					break;
@@ -75,80 +81,76 @@ int main() {
 
 		SDL_SetRenderDrawColor(renderer, 0, 0, 0, 50);
 		SDL_RenderClear(renderer);
-
 		for (int i = 0; i < NUM_CONES; i++) {
 
-			float theta = -PI + (i/(float) NUM_CONES) * 2 * PI;
-			float thetaN = -PI + ((i+1)/(float) NUM_CONES) * 2 * PI;
-
-			// Find nearest point in cone
-			int min_idx = -1;
+			vec2 min_pt = {-1, -1};
 			float min_dist = pow(2, 31);
+			float closest_wall = pow(2, 31);
+
+			// Find nearest visible point in cone
+			float theta = -PI + (i / (float) NUM_CONES) * 2 * PI;
+			float thetaN = -PI + ((i+1) / (float) NUM_CONES) * 2 * PI;
 			for (int j = 0; j < num_points; j++) {
 
-				int x4 = points[j][0];
-				int y4 = points[j][1];
-				int x3 = x;
-				int y3 = y;
-
+				float x4 = points[j].x;
+				float y4 = points[j].y;
 				float alpha = atan2(y4 - y3, x4 - x3);
-				
-				if (alpha < thetaN && alpha >= theta) {
-					float closest_wall = pow(2, 31);
-					for (int i = 0; i < NUM_OBSTACLES; i++) {
-						int x1 = obstacles[i][0];
-						int y1 = obstacles[i][1];
-						int x2 = obstacles[i][2];
-						int y2 = obstacles[i][3];
 
-						float denominator = (x1-x2)*(y3-y4)-(y1-y2)*(x3-x4);
+				if (alpha >= thetaN || alpha < theta) continue;
+				// Checks if the vector from the mouse to the point intersects any walls
+				for (int w = 0; w < NUM_OBSTACLES; w++) {
+					float x1 = obstacles[w].points[0].x;
+					float y1 = obstacles[w].points[0].y;
+					float x2 = obstacles[w].points[1].x;
+					float y2 = obstacles[w].points[1].y;
 
-						// vectors do not ever intersect
-						if (denominator == 0) continue;
+					float denominator = (x1-x2)*(y3-y4)-(y1-y2)*(x3-x4);
 
-						float t = ((x1-x3)*(y3-y4)-(y1-y3)*(x3-x4))/denominator;
-						float u = -((x1-x2)*(y1-y3)-(y1-y2)*(x1-x3))/denominator;
+					// vectors do not ever intersect
+					if (denominator == 0) continue;
 
-						// Case where the vectors intersect
-						if (t > 0 && t < 1 && u > 0) {
+					float t = ((x1-x3)*(y3-y4)-(y1-y3)*(x3-x4))/denominator;
+					float u = -((x1-x2)*(y1-y3)-(y1-y2)*(x1-x3))/denominator;
 
-							int px = x1 + t * (x2 - x1);
-							int py = y1 + t * (y2 - y1);
-							float int_dist = sqrt(pow(py-y1, 2) + pow(px-x1, 2));
-							closest_wall = std::min(closest_wall, int_dist);
-						}
-					}
+					// Vectors do not intersect
+					if (t <= 0 || t >= 1 || u <= 0) continue;
 
-					float distance = sqrt(pow(points[j][0] - x, 2) + pow(points[j][1] - y, 2));
-					if (distance < min_dist && distance < closest_wall) {
-						min_dist = distance;
-						min_idx = j;
-					}
+					vec2 hit = { x1 + t * (x2 - x1), y1 + t * (y2 - y1) };
+					float hit_dist = sqrt(pow(hit.y - y3, 2) + pow(hit.x - x3, 2));
+					// Checks if the intersected wall is the closest to the camera
+					closest_wall = std::min(closest_wall, hit_dist);
+				}
+
+				float distance = sqrt(pow(x4 - x3, 2) + pow(y4 - y3, 2));
+				if (distance < min_dist && distance < closest_wall) {
+					min_dist = distance;
+					min_pt = points[j];
 				}
 			}
+
+			// Draw cone lines
 			int vx = CONE_LENGTH * cos(theta);
 			int vy = CONE_LENGTH * sin(theta);
 			SDL_SetRenderDrawColor(renderer, 100, 100, 100, 50);
-			SDL_RenderDrawLine(renderer, x, y, x + vx, y + vy);
-			if (min_idx != -1) {
-				SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);
-				SDL_RenderDrawLine(renderer, x, y, points[min_idx][0], points[min_idx][1]);
-			}
+			SDL_RenderDrawLine(renderer, x3, y3, x3 + vx, y3 + vy);
 
+			// Draw line to nearest point in cone
+			if (min_dist >= pow(2, 31)) continue;
+
+			SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);
+			SDL_RenderDrawLine(renderer, x3, y3, min_pt.x, min_pt.y);
 		}
 
 		SDL_SetRenderDrawColor(renderer, 255, 255, 255, 50);
 		for (int i = 0; i < NUM_POINTS; i++) {
-			SDL_RenderDrawPoint(renderer, points[i][0], points[i][1]);
+			SDL_RenderDrawPoint(renderer, points[i].x, points[i].y);
 		}
 
 		SDL_SetRenderDrawColor(renderer, 0, 255, 0, 50);
 		for (int i = 0; i < NUM_OBSTACLES; i++) {
-			int x1 = obstacles[i][0];
-			int y1 = obstacles[i][1];
-			int x2 = obstacles[i][2];
-			int y2 = obstacles[i][3];
-			SDL_RenderDrawLine(renderer, x1, y1, x2, y2);
+			vec2 p0 = obstacles[i].points[0];
+			vec2 p1 = obstacles[i].points[1];
+			SDL_RenderDrawLine(renderer, p0.x, p0.y, p1.x, p1.y);
 		}
 		SDL_RenderPresent(renderer);
 	}
