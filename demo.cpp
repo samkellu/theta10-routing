@@ -13,9 +13,30 @@ struct vec2 {
 	float y;
 };
 
+struct color {
+	int r;
+	int g;
+	int b;
+	int a;
+};
+
 struct obstacle {
 	vec2 points[2];
 };
+
+void draw_point(SDL_Renderer* renderer, vec2 pos, color c) {
+
+	SDL_SetRenderDrawColor(renderer, c.r, c.g, c.b, c.a);
+	SDL_RenderDrawPoint(renderer, pos.x, pos.y);
+	SDL_RenderDrawPoint(renderer, pos.x-1, pos.y);
+	SDL_RenderDrawPoint(renderer, pos.x+1, pos.y);
+	SDL_RenderDrawPoint(renderer, pos.x, pos.y-1);
+	SDL_RenderDrawPoint(renderer, pos.x, pos.y+1);
+	SDL_RenderDrawPoint(renderer, pos.x-1, pos.y-1);
+	SDL_RenderDrawPoint(renderer, pos.x+1, pos.y-1);
+	SDL_RenderDrawPoint(renderer, pos.x+1, pos.y+1);
+	SDL_RenderDrawPoint(renderer, pos.x-1, pos.y+1);
+}
 
 int main() {
 
@@ -38,10 +59,13 @@ int main() {
 
 	SDL_Delay(1000);
 
-	vec2 points[NUM_POINTS];
+	vec2 points[NUM_POINTS + 2];
 	obstacle obstacles[NUM_OBSTACLES];
 	int cur_point = 0;
-	int num_points = 0;
+	int num_points = 2;
+
+	vec2* s = &points[0];
+	vec2* t = &points[1];
 
 	srand(time(NULL));
 	for (int i = 0; i < NUM_OBSTACLES; i++) {
@@ -73,9 +97,20 @@ int main() {
 					SDL_GetMouseState(&x3, &y3);
 					points[cur_point].x = x3;
 					points[cur_point].y = y3;
-					cur_point = (cur_point + 1) % NUM_POINTS;
-					num_points = num_points + 1 > NUM_POINTS ? NUM_POINTS : num_points + 1;
+					cur_point = (cur_point + 1) % (NUM_POINTS + 2) + 2;
+					num_points = num_points + 1 > NUM_POINTS + 2 ? NUM_POINTS : num_points + 1;
 					break;
+
+				case SDL_KEYDOWN:
+					switch (e.key.keysym.sym) {
+						case SDLK_s:
+							*s = {(float) x3, (float) y3};
+							break;
+
+						case SDLK_t:
+							*t = {(float) x3, (float) y3};
+							break;
+					}
 			}
 		}
 
@@ -141,10 +176,12 @@ int main() {
 			SDL_RenderDrawLine(renderer, x3, y3, min_pt.x, min_pt.y);
 		}
 
-		SDL_SetRenderDrawColor(renderer, 255, 255, 255, 50);
-		for (int i = 0; i < NUM_POINTS; i++) {
-			SDL_RenderDrawPoint(renderer, points[i].x, points[i].y);
+		for (int i = 2; i < NUM_POINTS + 2; i++) {
+			draw_point(renderer, points[i], {255, 255, 255, 50});
 		}
+
+		draw_point(renderer, *s, {255, 0, 0, 255});
+		draw_point(renderer, *t, {0, 0, 255, 255});
 
 		SDL_SetRenderDrawColor(renderer, 0, 255, 0, 50);
 		for (int i = 0; i < NUM_OBSTACLES; i++) {
