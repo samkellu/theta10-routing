@@ -38,6 +38,15 @@ void draw_point(SDL_Renderer* renderer, vec2 pos, color c) {
 	SDL_RenderDrawPoint(renderer, pos.x-1, pos.y+1);
 }
 
+float get_bisect_distance(vec2 v, obstacle bisect) {
+	float recip_m = (bisect.points[1].x - bisect.points[0].x) / (bisect.points[1].y - bisect.points[0].y);
+	float m = (bisect.points[1].y - bisect.points[0].y) / (bisect.points[1].x - bisect.points[0].x);
+	float recip_b = v.y - recip_m * v.x;
+	float b = bisect.points[0].y - m * bisect.points[0].x;
+	float y = recip_m *xxx + recip_b == m * xxx + b;
+
+}
+
 int main() {
 
     if(SDL_Init(SDL_INIT_VIDEO) != 0) {
