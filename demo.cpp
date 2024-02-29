@@ -38,13 +38,19 @@ void draw_point(SDL_Renderer* renderer, vec2 pos, color c) {
 	SDL_RenderDrawPoint(renderer, pos.x-1, pos.y+1);
 }
 
-float get_bisect_distance(vec2 v, obstacle bisect) {
+float get_bisect_distance(SDL_Renderer* renderer, vec2 v, obstacle bisect) {
 	float recip_m = (bisect.points[1].x - bisect.points[0].x) / (bisect.points[1].y - bisect.points[0].y);
 	float m = (bisect.points[1].y - bisect.points[0].y) / (bisect.points[1].x - bisect.points[0].x);
 	float recip_b = v.y - recip_m * v.x;
+	float tx = 1000;
+	float ty = recip_m * tx + recip_b;
+	SDL_RenderDrawLine(renderer, v.x, v.y, tx, ty);
 	float b = bisect.points[0].y - m * bisect.points[0].x;
-	float y = recip_m *xxx + recip_b == m * xxx + b;
+	float x = recip_b/(m - recip_m) - b/(m - recip_m);
+	float y = m * x + b;
+	draw_point(renderer, {x, y}, {255, 255, 255, 255});
 
+	return sqrt(pow(bisect.points[0].y - y, 2) + pow(bisect.points[0].x - x, 2));
 }
 
 int main() {
@@ -108,7 +114,6 @@ int main() {
 					points[cur_point].y = y3;
 					cur_point = (cur_point + 1) % (NUM_POINTS + 2);
 					cur_point = cur_point == 0 ? 2 : cur_point;
-					printf("%d\n", cur_point);
 					num_points = num_points + 1 > NUM_POINTS + 2 ? NUM_POINTS : num_points + 1;
 					break;
 
@@ -136,6 +141,16 @@ int main() {
 			// Find nearest visible point in cone
 			float theta = -PI + (i / (float) NUM_CONES) * 2 * PI;
 			float thetaN = -PI + ((i+1) / (float) NUM_CONES) * 2 * PI;
+
+			obstacle bisect;
+			bisect.points[0].x = x3;
+			bisect.points[0].y = y3;
+			bisect.points[1].x = x3 + cosf(theta + (thetaN - theta) / 2) * 1000;
+			bisect.points[1].y = y3 + sinf(theta + (thetaN - theta) / 2) * 1000;
+
+			SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);
+			SDL_RenderDrawLine(renderer, x3, y3, bisect.points[1].x, bisect.points[1].y);
+			
 			for (int j = 0; j < num_points; j++) {
 
 				float x4 = points[j].x;
@@ -167,7 +182,7 @@ int main() {
 					closest_wall = std::min(closest_wall, hit_dist);
 				}
 
-				float distance = sqrt(pow(x4 - x3, 2) + pow(y4 - y3, 2));
+				float distance = get_bisect_distance(renderer, points[j], bisect);
 				if (distance < min_dist && distance < closest_wall) {
 					min_dist = distance;
 					min_pt = points[j];
