@@ -61,7 +61,7 @@ int main() {
 
 	vec2 points[NUM_POINTS + 2];
 	obstacle obstacles[NUM_OBSTACLES];
-	int cur_point = 0;
+	int cur_point = 2;
 	int num_points = 2;
 
 	vec2* s = &points[0];
@@ -97,7 +97,9 @@ int main() {
 					SDL_GetMouseState(&x3, &y3);
 					points[cur_point].x = x3;
 					points[cur_point].y = y3;
-					cur_point = (cur_point + 1) % (NUM_POINTS + 2) + 2;
+					cur_point = (cur_point + 1) % (NUM_POINTS + 2);
+					cur_point = cur_point == 0 ? 2 : cur_point;
+					printf("%d\n", cur_point);
 					num_points = num_points + 1 > NUM_POINTS + 2 ? NUM_POINTS : num_points + 1;
 					break;
 
@@ -169,8 +171,8 @@ int main() {
 			SDL_SetRenderDrawColor(renderer, 100, 100, 100, 50);
 			SDL_RenderDrawLine(renderer, x3, y3, x3 + vx, y3 + vy);
 
-			// Draw line to nearest point in cone
-			if (min_dist >= pow(2, 31)) continue;
+			// Draw line to nearest point in cone if it exists
+			if (min_pt.x < 0) continue;
 
 			SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);
 			SDL_RenderDrawLine(renderer, x3, y3, min_pt.x, min_pt.y);
