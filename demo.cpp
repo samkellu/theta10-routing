@@ -9,8 +9,8 @@
 #define PI 3.14159
 
 struct vec2 {
-	float x;
-	float y;
+	double x;
+	double y;
 };
 
 struct color {
@@ -20,7 +20,7 @@ struct color {
 	int a;
 };
 
-struct obstacle {
+struct edge {
 	vec2 points[2];
 };
 
@@ -38,18 +38,17 @@ void draw_point(SDL_Renderer* renderer, vec2 pos, color c) {
 	SDL_RenderDrawPoint(renderer, pos.x-1, pos.y+1);
 }
 
-float get_bisect_distance(SDL_Renderer* renderer, vec2 v, obstacle bisect) {
-	float recip_m = (bisect.points[1].x - bisect.points[0].x) / (bisect.points[1].y - bisect.points[0].y);
-	float m = (bisect.points[1].y - bisect.points[0].y) / (bisect.points[1].x - bisect.points[0].x);
-	float recip_b = v.y - recip_m * v.x;
-	float tx = 1000;
-	float ty = recip_m * tx + recip_b;
-	SDL_RenderDrawLine(renderer, v.x, v.y, tx, ty);
-	float b = bisect.points[0].y - m * bisect.points[0].x;
-	float x = recip_b/(m - recip_m) - b/(m - recip_m);
-	float y = m * x + b;
-	draw_point(renderer, {x, y}, {255, 255, 255, 255});
+double get_bisect_distance(vec2 v, edge bisect) {
+	
+	double recip_m = -(bisect.points[1].x - bisect.points[0].x) / (bisect.points[1].y - bisect.points[0].y);
+	double m = (bisect.points[1].y - bisect.points[0].y) / (bisect.points[1].x - bisect.points[0].x);
 
+	double recip_b = v.y - recip_m * v.x;
+	double b = bisect.points[0].y - m * bisect.points[0].x;
+
+	double x = recip_b / (m - recip_m) - b / (m - recip_m);
+	double y = m * x + b;
+	
 	return sqrt(pow(bisect.points[0].y - y, 2) + pow(bisect.points[0].x - x, 2));
 }
 
@@ -74,31 +73,35 @@ int main() {
 
 	SDL_Delay(1000);
 
-	vec2 points[NUM_POINTS + 2];
-	obstacle obstacles[NUM_OBSTACLES];
-	int cur_point = 2;
+	const int s = 0;
+	const int t = 1;
+	const int p_start = 2;
+	const int p_end = NUM_POINTS + p_start;
+	int cur_point = p_start;
 	int num_points = 2;
-
-	vec2* s = &points[0];
-	vec2* t = &points[1];
+	vec2 points[NUM_POINTS + 2];
+	edge obstacles[NUM_OBSTACLES];
+	
+	points[s] = {50, 50};
+	points[t] = {400, 400};
+	edge st = {points[s], points[t]};
 
 	srand(time(NULL));
 	for (int i = 0; i < NUM_OBSTACLES; i++) {
-		obstacles[i] = {(float) (rand() % 1000),
-						(float) (rand() % 1000),
-						(float) (rand() % 1000),
-						(float) (rand() % 1000)};
+		obstacles[i] = {(double) (rand() % 1000),
+						(double) (rand() % 1000),
+						(double) (rand() % 1000),
+						(double) (rand() % 1000)};
 	}
 
-	SDL_Event e;
 	// mouse coords
 	int x3, y3;
 	bool running = true;
 	while (running) {
 
 		SDL_Delay(10);
+		SDL_Event e;
 		while (SDL_PollEvent(&e)) {
-
 			switch (e.type) {
 				case SDL_QUIT:
 					running = false;
@@ -112,21 +115,23 @@ int main() {
 					SDL_GetMouseState(&x3, &y3);
 					points[cur_point].x = x3;
 					points[cur_point].y = y3;
-					cur_point = (cur_point + 1) % (NUM_POINTS + 2);
-					cur_point = cur_point == 0 ? 2 : cur_point;
-					num_points = num_points + 1 > NUM_POINTS + 2 ? NUM_POINTS : num_points + 1;
+					cur_point = cur_point + 1 > p_end ? p_start : cur_point + 1;
+					num_points += num_points == p_end ? 0 : 1;
 					break;
 
 				case SDL_KEYDOWN:
 					switch (e.key.keysym.sym) {
 						case SDLK_s:
-							*s = {(float) x3, (float) y3};
+							points[s] = {(double) x3, (double) y3};
+							st.points[0] = points[s];
 							break;
 
 						case SDLK_t:
-							*t = {(float) x3, (float) y3};
+							points[t] = {(double) x3, (double) y3};
+							st.points[1] = points[t];
 							break;
 					}
+					break;
 			}
 		}
 
@@ -135,79 +140,94 @@ int main() {
 		for (int i = 0; i < NUM_CONES; i++) {
 
 			vec2 min_pt = {-1, -1};
-			float min_dist = pow(2, 31);
-			float closest_wall = pow(2, 31);
+			double min_bi_dist = pow(2, 31);
 
-			// Find nearest visible point in cone
-			float theta = -PI + (i / (float) NUM_CONES) * 2 * PI;
-			float thetaN = -PI + ((i+1) / (float) NUM_CONES) * 2 * PI;
+			// Find nearest visible point (bisect distance) in cone
+			double theta = -PI + (i / (double) NUM_CONES) * 2 * PI;
+			double thetaN = -PI + ((i+1) / (double) NUM_CONES) * 2 * PI;
 
-			obstacle bisect;
-			bisect.points[0].x = x3;
-			bisect.points[0].y = y3;
-			bisect.points[1].x = x3 + cosf(theta + (thetaN - theta) / 2) * 1000;
-			bisect.points[1].y = y3 + sinf(theta + (thetaN - theta) / 2) * 1000;
+			edge bisect = {
+				(double) x3,
+				(double) y3,
+				x3 + cosf(theta + (thetaN - theta) / 2) * CONE_LENGTH,
+				y3 + sinf(theta + (thetaN - theta) / 2) * CONE_LENGTH};
 
-			SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);
-			SDL_RenderDrawLine(renderer, x3, y3, bisect.points[1].x, bisect.points[1].y);
-			
 			for (int j = 0; j < num_points; j++) {
 
-				float x4 = points[j].x;
-				float y4 = points[j].y;
-				float alpha = atan2(y4 - y3, x4 - x3);
+				double bisect_distance = get_bisect_distance(points[j], bisect);
+				if (bisect_distance >= min_bi_dist) continue;
 
+				double x4 = points[j].x;
+				double y4 = points[j].y;
+				double alpha = atan2(y4 - y3, x4 - x3);
+				// Point is not in current cone
 				if (alpha >= thetaN || alpha < theta) continue;
+
+				double distance = sqrt(pow(x3 - x4, 2) + pow(y3 - y4, 2));
+				bool is_visible = true;
 				// Checks if the vector from the mouse to the point intersects any walls
 				for (int w = 0; w < NUM_OBSTACLES; w++) {
-					float x1 = obstacles[w].points[0].x;
-					float y1 = obstacles[w].points[0].y;
-					float x2 = obstacles[w].points[1].x;
-					float y2 = obstacles[w].points[1].y;
+					double x1 = obstacles[w].points[0].x;
+					double y1 = obstacles[w].points[0].y;
+					double x2 = obstacles[w].points[1].x;
+					double y2 = obstacles[w].points[1].y;
 
-					float denominator = (x1-x2)*(y3-y4)-(y1-y2)*(x3-x4);
+					double denominator = (x1-x2)*(y3-y4)-(y1-y2)*(x3-x4);
 
 					// vectors do not ever intersect
 					if (denominator == 0) continue;
 
-					float t = ((x1-x3)*(y3-y4)-(y1-y3)*(x3-x4))/denominator;
-					float u = -((x1-x2)*(y1-y3)-(y1-y2)*(x1-x3))/denominator;
+					double t = ((x1-x3)*(y3-y4)-(y1-y3)*(x3-x4))/denominator;
+					double u = -((x1-x2)*(y1-y3)-(y1-y2)*(x1-x3))/denominator;
 
 					// Vectors do not intersect
 					if (t <= 0 || t >= 1 || u <= 0) continue;
 
 					vec2 hit = { x1 + t * (x2 - x1), y1 + t * (y2 - y1) };
-					float hit_dist = sqrt(pow(hit.y - y3, 2) + pow(hit.x - x3, 2));
-					// Checks if the intersected wall is the closest to the camera
-					closest_wall = std::min(closest_wall, hit_dist);
+					double hit_dist = sqrt(pow(hit.y - y3, 2) + pow(hit.x - x3, 2));
+					if (hit_dist <= distance) {
+						is_visible = false;
+						break;
+					}
 				}
 
-				float distance = get_bisect_distance(renderer, points[j], bisect);
-				if (distance < min_dist && distance < closest_wall) {
-					min_dist = distance;
-					min_pt = points[j];
-				}
+				if (!is_visible) continue;
+
+				min_bi_dist = bisect_distance;
+				min_pt = points[j];
 			}
 
 			// Draw cone lines
-			int vx = CONE_LENGTH * cos(theta);
-			int vy = CONE_LENGTH * sin(theta);
-			SDL_SetRenderDrawColor(renderer, 100, 100, 100, 50);
-			SDL_RenderDrawLine(renderer, x3, y3, x3 + vx, y3 + vy);
+			int cx = x3 + CONE_LENGTH * cos(theta);
+			int cy = y3 + CONE_LENGTH * sin(theta);
+			SDL_SetRenderDrawColor(renderer, 100, 100, 100, 255);
+			SDL_RenderDrawLine(renderer, x3, y3, cx, cy);
 
 			// Draw line to nearest point in cone if it exists
-			if (min_pt.x < 0) continue;
+			if (min_bi_dist == pow(2, 31)) continue;
+
+
+			double tri_width = min_bi_dist * tanf(PI / NUM_CONES);
+			double tri_length = sqrt(pow(min_bi_dist, 2) + pow(tri_width, 2));
+			// Draw triangle
+			int blx = x3 + tri_length * cosf(theta);
+			int bly = y3 + tri_length * sinf(theta);
+			int brx = x3 + tri_length * cosf(thetaN);
+			int bry = y3 + tri_length * sinf(thetaN);
 
 			SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);
 			SDL_RenderDrawLine(renderer, x3, y3, min_pt.x, min_pt.y);
+			SDL_RenderDrawLine(renderer, blx, bly, brx, bry);
+			SDL_RenderDrawLine(renderer, x3, y3, brx, bry);
+			SDL_RenderDrawLine(renderer, x3, y3, blx, bly);
 		}
 
-		for (int i = 2; i < NUM_POINTS + 2; i++) {
+		for (int i = p_start; i < num_points; i++) {
 			draw_point(renderer, points[i], {255, 255, 255, 50});
 		}
 
-		draw_point(renderer, *s, {255, 0, 0, 255});
-		draw_point(renderer, *t, {0, 0, 255, 255});
+		draw_point(renderer, points[s], {255, 0, 0, 255});
+		draw_point(renderer, points[t], {0, 0, 255, 255});
 
 		SDL_SetRenderDrawColor(renderer, 0, 255, 0, 50);
 		for (int i = 0; i < NUM_OBSTACLES; i++) {
@@ -215,6 +235,9 @@ int main() {
 			vec2 p1 = obstacles[i].points[1];
 			SDL_RenderDrawLine(renderer, p0.x, p0.y, p1.x, p1.y);
 		}
+
+		SDL_SetRenderDrawColor(renderer, 255, 255, 0, 50);
+		SDL_RenderDrawLine(renderer, st.points[0].x, st.points[0].y, st.points[1].x, st.points[1].y);
 		SDL_RenderPresent(renderer);
 	}
 
