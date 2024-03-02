@@ -52,6 +52,39 @@ double get_bisect_distance(vec2 v, edge bisect) {
 	return sqrt(pow(bisect.points[0].y - y, 2) + pow(bisect.points[0].x - x, 2));
 }
 
+bool is_visible(vec2 observer, vec2 pt, edge obstacles[], int n) {
+
+	int x3 = observer.x;
+	int y3 = observer.y;
+	int x4 = pt.x;
+	int y4 = pt.y;
+	double distance = sqrt(pow(x3 - x4, 2) + pow(y3 - y4, 2));
+
+	for (int i = 0; i < n; i++) {
+		double x1 = obstacles[i].points[0].x;
+		double y1 = obstacles[i].points[0].y;
+		double x2 = obstacles[i].points[1].x;
+		double y2 = obstacles[i].points[1].y;
+
+		double denominator = (x1-x2)*(y3-y4)-(y1-y2)*(x3-x4);
+
+		// vectors do not ever intersect
+		if (denominator == 0) continue;
+
+		double t = ((x1-x3)*(y3-y4)-(y1-y3)*(x3-x4))/denominator;
+		double u = -((x1-x2)*(y1-y3)-(y1-y2)*(x1-x3))/denominator;
+
+		// Vectors do not intersect
+		if (t <= 0 || t >= 1 || u <= 0) continue;
+
+		vec2 hit = { x1 + t * (x2 - x1), y1 + t * (y2 - y1) };
+		double hit_dist = sqrt(pow(hit.y - y3, 2) + pow(hit.x - x3, 2));
+		if (hit_dist <= distance) return false;
+	}
+
+	return true;
+}
+
 int main() {
 
     if(SDL_Init(SDL_INIT_VIDEO) != 0) {
@@ -95,7 +128,7 @@ int main() {
 	}
 
 	// mouse coords
-	int x3, y3;
+	int mx, my;
 	bool running = true;
 	while (running) {
 
@@ -108,13 +141,13 @@ int main() {
 					break;
 
 				case SDL_MOUSEMOTION:
-					SDL_GetMouseState(&x3, &y3);
+					SDL_GetMouseState(&mx, &my);
 					break;
 
 				case SDL_MOUSEBUTTONDOWN:
-					SDL_GetMouseState(&x3, &y3);
-					points[cur_point].x = x3;
-					points[cur_point].y = y3;
+					SDL_GetMouseState(&mx, &my);
+					points[cur_point].x = mx;
+					points[cur_point].y = my;
 					cur_point = cur_point + 1 > p_end ? p_start : cur_point + 1;
 					num_points += num_points == p_end ? 0 : 1;
 					break;
@@ -122,12 +155,12 @@ int main() {
 				case SDL_KEYDOWN:
 					switch (e.key.keysym.sym) {
 						case SDLK_s:
-							points[s] = {(double) x3, (double) y3};
+							points[s] = {(double) mx, (double) my};
 							st.points[0] = points[s];
 							break;
 
 						case SDLK_t:
-							points[t] = {(double) x3, (double) y3};
+							points[t] = {(double) mx, (double) my};
 							st.points[1] = points[t];
 							break;
 					}
@@ -147,61 +180,33 @@ int main() {
 			double thetaN = -PI + ((i+1) / (double) NUM_CONES) * 2 * PI;
 
 			edge bisect = {
-				(double) x3,
-				(double) y3,
-				x3 + cosf(theta + (thetaN - theta) / 2) * CONE_LENGTH,
-				y3 + sinf(theta + (thetaN - theta) / 2) * CONE_LENGTH};
+				(double) mx,
+				(double) my,
+				mx + cosf(theta + (thetaN - theta) / 2) * CONE_LENGTH,
+				my + sinf(theta + (thetaN - theta) / 2) * CONE_LENGTH};
 
 			for (int j = 0; j < num_points; j++) {
+
+				vec2 pt = points[j];
+				double alpha = atan2(pt.y - my, pt.x - mx);
+				// Point is not in current cone
+				if (alpha >= thetaN || alpha < theta) continue;
 
 				double bisect_distance = get_bisect_distance(points[j], bisect);
 				if (bisect_distance >= min_bi_dist) continue;
 
-				double x4 = points[j].x;
-				double y4 = points[j].y;
-				double alpha = atan2(y4 - y3, x4 - x3);
-				// Point is not in current cone
-				if (alpha >= thetaN || alpha < theta) continue;
-
-				double distance = sqrt(pow(x3 - x4, 2) + pow(y3 - y4, 2));
-				bool is_visible = true;
 				// Checks if the vector from the mouse to the point intersects any walls
-				for (int w = 0; w < NUM_OBSTACLES; w++) {
-					double x1 = obstacles[w].points[0].x;
-					double y1 = obstacles[w].points[0].y;
-					double x2 = obstacles[w].points[1].x;
-					double y2 = obstacles[w].points[1].y;
-
-					double denominator = (x1-x2)*(y3-y4)-(y1-y2)*(x3-x4);
-
-					// vectors do not ever intersect
-					if (denominator == 0) continue;
-
-					double t = ((x1-x3)*(y3-y4)-(y1-y3)*(x3-x4))/denominator;
-					double u = -((x1-x2)*(y1-y3)-(y1-y2)*(x1-x3))/denominator;
-
-					// Vectors do not intersect
-					if (t <= 0 || t >= 1 || u <= 0) continue;
-
-					vec2 hit = { x1 + t * (x2 - x1), y1 + t * (y2 - y1) };
-					double hit_dist = sqrt(pow(hit.y - y3, 2) + pow(hit.x - x3, 2));
-					if (hit_dist <= distance) {
-						is_visible = false;
-						break;
-					}
-				}
-
-				if (!is_visible) continue;
+				if (!is_visible({(double) mx, (double) my}, points[j], obstacles, NUM_OBSTACLES)) continue;
 
 				min_bi_dist = bisect_distance;
 				min_pt = points[j];
 			}
 
 			// Draw cone lines
-			int cx = x3 + CONE_LENGTH * cos(theta);
-			int cy = y3 + CONE_LENGTH * sin(theta);
+			int cx = mx + CONE_LENGTH * cos(theta);
+			int cy = my + CONE_LENGTH * sin(theta);
 			SDL_SetRenderDrawColor(renderer, 100, 100, 100, 255);
-			SDL_RenderDrawLine(renderer, x3, y3, cx, cy);
+			SDL_RenderDrawLine(renderer, mx, my, cx, cy);
 
 			// Draw line to nearest point in cone if it exists
 			if (min_bi_dist == pow(2, 31)) continue;
@@ -210,16 +215,16 @@ int main() {
 			double tri_width = min_bi_dist * tanf(PI / NUM_CONES);
 			double tri_length = sqrt(pow(min_bi_dist, 2) + pow(tri_width, 2));
 			// Draw triangle
-			int blx = x3 + tri_length * cosf(theta);
-			int bly = y3 + tri_length * sinf(theta);
-			int brx = x3 + tri_length * cosf(thetaN);
-			int bry = y3 + tri_length * sinf(thetaN);
+			int blx = mx + tri_length * cosf(theta);
+			int bly = my + tri_length * sinf(theta);
+			int brx = mx + tri_length * cosf(thetaN);
+			int bry = my + tri_length * sinf(thetaN);
 
 			SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);
-			SDL_RenderDrawLine(renderer, x3, y3, min_pt.x, min_pt.y);
+			SDL_RenderDrawLine(renderer, mx, my, min_pt.x, min_pt.y);
 			SDL_RenderDrawLine(renderer, blx, bly, brx, bry);
-			SDL_RenderDrawLine(renderer, x3, y3, brx, bry);
-			SDL_RenderDrawLine(renderer, x3, y3, blx, bly);
+			SDL_RenderDrawLine(renderer, mx, my, brx, bry);
+			SDL_RenderDrawLine(renderer, mx, my, blx, bly);
 		}
 
 		for (int i = p_start; i < num_points; i++) {
