@@ -52,33 +52,40 @@ double get_bisect_distance(vec2 v, edge bisect) {
 	return sqrt(pow(bisect.points[0].y - y, 2) + pow(bisect.points[0].x - x, 2));
 }
 
+vec2 get_intersect(edge l1, edge l2) {
+
+	double x[] = {l2.points[0].x,
+				  l2.points[1].x,
+				  l1.points[0].x,
+				  l1.points[1].x};
+
+	double y[] = {l2.points[0].y,
+				  l2.points[1].y,
+				  l1.points[0].y,
+				  l1.points[1].y};
+
+	double denominator = (x[0]-x[1])*(y[2]-y[3])-(y[0]-y[1])*(x[2]-x[3]);
+
+	// vectors do not ever intersect
+	if (denominator == 0) return {-1, -1};
+
+	double t = ((x[0]-x[2])*(y[2]-y[3])-(y[0]-y[2])*(x[2]-x[3]))/denominator;
+	double u = -((x[0]-x[1])*(y[0]-y[2])-(y[0]-y[1])*(x[0]-x[2]))/denominator;
+
+	// Vectors do not intersect
+	if (t <= 0 || t >= 1 || u <= 0) return {-1, -1};
+
+	return { x[0] + t * (x[1] - x[0]), y[0] + t * (y[1] - y[0]) };
+}
+
 bool is_visible(vec2 observer, vec2 pt, edge obstacles[], int n) {
 
-	int x3 = observer.x;
-	int y3 = observer.y;
-	int x4 = pt.x;
-	int y4 = pt.y;
-	double distance = sqrt(pow(x3 - x4, 2) + pow(y3 - y4, 2));
+	edge vis_edge = {observer.x, observer.y, pt.x, pt.y};
+	double distance = sqrt(pow(observer.x - pt.x, 2) + pow(observer.y - pt.y, 2));
 
 	for (int i = 0; i < n; i++) {
-		double x1 = obstacles[i].points[0].x;
-		double y1 = obstacles[i].points[0].y;
-		double x2 = obstacles[i].points[1].x;
-		double y2 = obstacles[i].points[1].y;
-
-		double denominator = (x1-x2)*(y3-y4)-(y1-y2)*(x3-x4);
-
-		// vectors do not ever intersect
-		if (denominator == 0) continue;
-
-		double t = ((x1-x3)*(y3-y4)-(y1-y3)*(x3-x4))/denominator;
-		double u = -((x1-x2)*(y1-y3)-(y1-y2)*(x1-x3))/denominator;
-
-		// Vectors do not intersect
-		if (t <= 0 || t >= 1 || u <= 0) continue;
-
-		vec2 hit = { x1 + t * (x2 - x1), y1 + t * (y2 - y1) };
-		double hit_dist = sqrt(pow(hit.y - y3, 2) + pow(hit.x - x3, 2));
+		vec2 hit = get_intersect(vis_edge, obstacles[i]);
+		double hit_dist = sqrt(pow(hit.y - observer.y, 2) + pow(hit.x - observer.x, 2));
 		if (hit_dist <= distance) return false;
 	}
 
@@ -114,10 +121,6 @@ int main() {
 	int num_points = 2;
 	vec2 points[NUM_POINTS + 2];
 	edge obstacles[NUM_OBSTACLES];
-	
-	points[s] = {50, 50};
-	points[t] = {400, 400};
-	edge st = {points[s], points[t]};
 
 	srand(time(NULL));
 	for (int i = 0; i < NUM_OBSTACLES; i++) {
@@ -126,6 +129,19 @@ int main() {
 						(double) (rand() % 1000),
 						(double) (rand() % 1000)};
 	}
+
+	edge st;
+	do {
+
+		points[s] = {(double) (rand() % 1000),
+				 	 (double) (rand() % 1000)};
+
+		points[t] = {(double) (rand() % 1000),
+				 	 (double) (rand() % 1000)};
+
+		st = {points[s], points[t]};
+
+	} while (!is_visible(points[s], points[t], obstacles, NUM_OBSTACLES));
 
 	// mouse coords
 	int mx, my;
@@ -183,7 +199,8 @@ int main() {
 				(double) mx,
 				(double) my,
 				mx + cosf(theta + (thetaN - theta) / 2) * CONE_LENGTH,
-				my + sinf(theta + (thetaN - theta) / 2) * CONE_LENGTH};
+				my + sinf(theta + (thetaN - theta) / 2) * CONE_LENGTH
+			};
 
 			for (int j = 0; j < num_points; j++) {
 
@@ -210,7 +227,6 @@ int main() {
 
 			// Draw line to nearest point in cone if it exists
 			if (min_bi_dist == pow(2, 31)) continue;
-
 
 			double tri_width = min_bi_dist * tanf(PI / NUM_CONES);
 			double tri_length = sqrt(pow(min_bi_dist, 2) + pow(tri_width, 2));
