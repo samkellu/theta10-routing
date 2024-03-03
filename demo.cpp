@@ -24,6 +24,9 @@ struct edge {
 	vec2 points[2];
 };
 
+vec2 points[NUM_POINTS + NUM_OBSTACLES * 2 + 2];
+edge obstacles[NUM_OBSTACLES];
+
 void draw_point(SDL_Renderer* renderer, vec2 pos, color c) {
 
 	SDL_SetRenderDrawColor(renderer, c.r, c.g, c.b, c.a);
@@ -115,19 +118,28 @@ int main() {
 
 	const int s = 0;
 	const int t = 1;
-	const int p_start = 2;
+	const int p_start = 2 + NUM_OBSTACLES * 2;
 	const int p_end = NUM_POINTS + p_start;
-	int cur_point = p_start;
-	int num_points = 2;
-	vec2 points[NUM_POINTS + 2];
-	edge obstacles[NUM_OBSTACLES];
+	int cur_point = 2;
+	int num_points = p_start;
 
 	srand(time(NULL));
 	for (int i = 0; i < NUM_OBSTACLES; i++) {
-		obstacles[i] = {(double) (rand() % 1000),
-						(double) (rand() % 1000),
-						(double) (rand() % 1000),
-						(double) (rand() % 1000)};
+		bool valid = true;
+		do {
+			obstacles[i] = {(double) (rand() % 1000),
+							(double) (rand() % 1000),
+							(double) (rand() % 1000),
+							(double) (rand() % 1000)};
+
+			for (int j = 0; j < i; j++) {
+				valid = get_intersect(obstacles[i],  obstacles[j]).x == -1;
+				if (!valid) break;
+			}
+		} while (!valid);
+
+		points[++cur_point] = obstacles[i].points[0];
+		points[++cur_point] = obstacles[i].points[1];
 	}
 
 	edge st;
@@ -243,7 +255,7 @@ int main() {
 			SDL_RenderDrawLine(renderer, mx, my, blx, bly);
 		}
 
-		for (int i = p_start; i < num_points; i++) {
+		for (int i = 2; i < num_points; i++) {
 			draw_point(renderer, points[i], {255, 255, 255, 50});
 		}
 
