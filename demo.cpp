@@ -117,6 +117,24 @@ double get_orth_distance(vec2 v, edge edge) {
 double get_distance_from_edge(vec2 v, edge edge) {
 	
 	vec2 projected = orth_project(v, edge);
+	// check projected hit is on the line at all
+
+	vec2 high_x = edge.points[0];
+	vec2 low_x = edge.points[1];
+	if (low_x.x > high_x.x)
+		high_x = edge.points[1];
+		low_x = edge.points[0];
+
+	double x_max = std::max(edge.points[0].x, edge.points[1].x); 
+	double x_min = std::min(edge.points[0].x, edge.points[1].x);
+
+	if (projected.x > high_x.x) {
+		return sqrt(pow(v.y - high_x.y, 2) + pow(v.x - high_x.x, 2));
+	
+	} else if (projected.x < x_min) {
+		return sqrt(pow(v.y - low_x.y, 2) + pow(v.x - low_x.x, 2));
+	}
+
 	return sqrt(pow(v.y - projected.y, 2) + pow(v.x - projected.x, 2));
 }
 
@@ -175,6 +193,8 @@ routing_data* generate_cones(SDL_Renderer* renderer, vec2 v) {
 
 		for (int j = 0; j < num_points; j++) {
 
+			if (points[j].x == v.x && points[j].y == v.y) continue;
+
 			vec2 pt = points[j];
 			double alpha = atan2(pt.y - v.y, pt.x - v.x);
 			// Point is not in current cone
@@ -212,20 +232,21 @@ void route(SDL_Renderer* renderer) {
 	SDL_RenderClear(renderer);
 	draw(renderer);
 
-	double cone_angles[NUM_CONES-1];
-	for (int i = 0; i < NUM_CONES; i++)  {
-		-PI + (i / (double) NUM_CONES) * 2 * PI;
-	} 
-
 	vec2 cur_point = points[s];
-	while (1) {
-		routing_data* visible_points = generate_cones(renderer, cur_point);
+	routing_data* visible_points;
+	int max_steps = 20;
+	while (max_steps-- >= 0) {
+		visible_points = generate_cones(renderer, cur_point);
 
 		int cone = -1; 
 		double t_angle = atan2(points[t].y - cur_point.y, points[t].x - cur_point.x);
-		for (int i = 0; i < NUM_CONES-1; i++) {
-			if (t_angle > cone_angles[i] && t_angle <= cone_angles[i+1]) {
+		for (int i = 0; i < NUM_CONES; i++)  {
+			double theta = -PI + (i / (double) NUM_CONES) * 2 * PI;
+			double thetaN = -PI + ((i+1) / (double) NUM_CONES) * 2 * PI;
+
+			if (t_angle > theta && t_angle <= thetaN) {
 				cone = i;
+				printf("FOUND in cone %d\n", i);
 				break;
 			}
 		}
@@ -234,31 +255,65 @@ void route(SDL_Renderer* renderer) {
 		routing_data closest_point = {-1, -1, -1, -1, -1};
 		edge e = {points[s], points[t]};
 
+		SDL_SetRenderDrawColor(renderer, 100, 100, 100, 100);
 		for (int i = cone - 2; i <= cone + 2; i++) {
-			routing_data r = visible_points[i % NUM_CONES];
-			if (r.dist <= 0) continue;
+			int idx = i % NUM_CONES;
+			double theta = -PI + (idx / (double) NUM_CONES) * 2 * PI;
+			double thetaN = -PI + ((idx+1) / (double) NUM_CONES) * 2 * PI;
+			int cx = cur_point.x + CONE_LENGTH * cos(theta);
+			int cy = cur_point.y + CONE_LENGTH * sin(theta);
+			SDL_RenderDrawLine(renderer, cur_point.x, cur_point.y, cx, cy);
+			int crx = cur_point.x + CONE_LENGTH * cos(thetaN);
+			int cry = cur_point.y + CONE_LENGTH * sin(thetaN);
+			SDL_RenderDrawLine(renderer, cur_point.x, cur_point.y, crx, cry);
+
+			routing_data r = visible_points[idx];
+			
 			double distance = get_distance_from_edge(r.v, e);
+			printf("%d %lf\n", idx, distance);
+
 			if (distance < closest_dist) {
 				closest_dist = distance;
 				closest_point = r;
 			}
 		}
 
+		printf("\nclosest to edge: %lf\n", closest_dist);  
 		if (closest_point.dist == -1) break;
 
-		printf("%d %d\n", cur_point.x, cur_point.y);
 		draw_tri(renderer, cur_point, {255, 0, 0, 150}, closest_point.cone_left_angle, closest_point.cone_right_angle, closest_point.dist);
 		draw_line(renderer, cur_point, closest_point.v, {255, 0, 0, 150});
 
-		if (cur_point.x == closest_point.v.x && cur_point.y == closest_point.v.y) break;
-		cur_point = closest_point.v;
-		if (cur_point.x == points[t].x && cur_point.y == points[t].y) break;
-
 		SDL_RenderPresent(renderer);
 		SDL_Delay(1000);
+		if (closest_point.v.x == points[t].x && closest_point.v.y == points[t].y) break;
+		printf("%lf %lf %lf %lf\n", cur_point.x, cur_point.y, points[t].x, points[t].y);
+		if (cur_point.x == closest_point.v.x && cur_point.y == closest_point.v.y) break;
+
+		SDL_SetRenderDrawColor(renderer, 0, 0, 0, 0);
+		for (int i = cone - 2; i <= cone + 2; i++) {
+			int idx = i % NUM_CONES;
+			double theta = -PI + (idx / (double) NUM_CONES) * 2 * PI;
+			double thetaN = -PI + ((idx+1) / (double) NUM_CONES) * 2 * PI;
+			int cx = cur_point.x + CONE_LENGTH * cos(theta);
+			int cy = cur_point.y + CONE_LENGTH * sin(theta);
+			SDL_RenderDrawLine(renderer, cur_point.x, cur_point.y, cx, cy);
+			int crx = cur_point.x + CONE_LENGTH * cos(thetaN);
+			int cry = cur_point.y + CONE_LENGTH * sin(thetaN);
+			SDL_RenderDrawLine(renderer, cur_point.x, cur_point.y, crx, cry);
+		}
+
+		draw_tri(renderer, cur_point, {255, 0, 0, 150}, closest_point.cone_left_angle, closest_point.cone_right_angle, closest_point.dist);
+		draw_line(renderer, cur_point, closest_point.v, {255, 0, 0, 150});
+
+		SDL_RenderPresent(renderer);
+		cur_point = closest_point.v; 
+
 		free(visible_points);
+		visible_points = NULL;
 	}
 
+	if (visible_points) free(visible_points);
 	SDL_Delay(2000);
 	return;
 }
@@ -387,4 +442,3 @@ int main() {
     SDL_Quit();
     return 0;
 }
-
