@@ -188,7 +188,6 @@ bool is_visible(vec2 observer, vec2 pt, edge obstacles[], int n) {
 }
 
 cone bisect_alg(SDL_Renderer* renderer, vec2 cur_point, cone* cones, int n_cones, cone found_cone) {
-		printf("fc %d %d\n", found_cone.closest_pt.x, found_cone.closest_pt.y);
 
 	edge e = {points[s], points[t]};
 	cone best_cone;
@@ -200,12 +199,9 @@ cone bisect_alg(SDL_Renderer* renderer, vec2 cur_point, cone* cones, int n_cones
 	for (int i = 0; i < n_cones; i++) {
 
 		cone c = cones[i];
-		if (c.cone_left_angle + (PI/2) < found_cone_bisect_angle || c.cone_right_angle - (PI/2) > found_cone_bisect_angle) {
+		if (c.cone_left_angle + (PI/2) < found_cone_bisect_angle || c.cone_right_angle - (PI/2) > found_cone_bisect_angle)
 			continue;
-		}
 
-		printf("%d %d\n", c.closest_pt.x, c.closest_pt.y);
-			
 		int cx = cur_point.x + CONE_LENGTH * cos(c.cone_left_angle);
 		int cy = cur_point.y + CONE_LENGTH * sin(c.cone_left_angle);
 		SDL_RenderDrawLine(renderer, cur_point.x, cur_point.y, cx, cy);
@@ -218,6 +214,47 @@ cone bisect_alg(SDL_Renderer* renderer, vec2 cur_point, cone* cones, int n_cones
 
 		if (distance < closest_dist) {
 			closest_dist = distance;
+			best_cone = c;
+		}
+	}
+
+	return best_cone;
+}
+
+cone low_angle_alg(SDL_Renderer* renderer, vec2 cur_point, cone* cones, int n_cones, cone found_cone) {
+
+	edge e = {points[s], points[t]};
+	cone best_cone;
+	best_cone.initialized = false;
+
+	double best_angle = 360;
+	SDL_SetRenderDrawColor(renderer, 100, 100, 100, 100);
+	double found_cone_bisect_angle = found_cone.cone_left_angle + (found_cone.cone_right_angle - found_cone.cone_left_angle) / 2;
+	for (int i = 0; i < n_cones; i++) {
+
+		cone c = cones[i];
+		if (c.cone_left_angle + (PI/2) < found_cone_bisect_angle || c.cone_right_angle - (PI/2) > found_cone_bisect_angle)
+			continue;
+
+		int cx = cur_point.x + CONE_LENGTH * cos(c.cone_left_angle);
+		int cy = cur_point.y + CONE_LENGTH * sin(c.cone_left_angle);
+		SDL_RenderDrawLine(renderer, cur_point.x, cur_point.y, cx, cy);
+		int crx = cur_point.x + CONE_LENGTH * cos(c.cone_right_angle);
+		int cry = cur_point.y + CONE_LENGTH * sin(c.cone_right_angle);
+		SDL_RenderDrawLine(renderer, cur_point.x, cur_point.y, crx, cry);
+
+		if (c.closest_pt.x == points[t].x && c.closest_pt.y == points[t].y) return c;
+
+		vec2 v_proj = orth_project(c.v, e);
+		vec2 u_proj = orth_project(c.closest_pt, e);
+		double o = get_distance_from_edge(c.closest_pt, e);
+		double a = sqrt(pow(v_proj.y - u_proj.y, 2) + pow(v_proj.x - u_proj.x, 2));
+		double alpha = atan(o/a);
+		alpha *= alpha < 0 ? -1 : 1;
+
+		printf("alpha %lf\n", alpha);
+		if (alpha < best_angle) {
+			best_angle = alpha;
 			best_cone = c;
 		}
 	}
@@ -253,7 +290,6 @@ cone* generate_cones(SDL_Renderer* renderer, vec2 v, int* n_cones_out) {
 
 	int n_subcones;
 	double* subcone_bounds = get_subcones(v, &n_subcones);
-	printf("%d\n", n_subcones);
 
 	int n_cones = NUM_CONES + n_subcones;
 
@@ -350,9 +386,13 @@ void route(SDL_Renderer* renderer) {
 		}
 
 		printf("fc %d %d\n", found_cone.closest_pt.x, found_cone.closest_pt.y);
-		cone best_cone = bisect_alg(renderer, cur_point, cones, n_cones, found_cone);
+		// cone best_cone = bisect_alg(renderer, cur_point, cones, n_cones, found_cone);
+		cone best_cone = low_angle_alg(renderer, cur_point, cones, n_cones, found_cone);
 		
-		if (!best_cone.initialized) break;
+		if (!best_cone.initialized) {
+			printf("Failed to find good cone\n");
+			break;
+		}
 
 		vec2 best_pt = best_cone.closest_pt;
 
