@@ -2,7 +2,7 @@
 #include "graphics.h"
 #include "algorithms.h"
 
-point points[NUM_POINTS + NUM_OBSTACLES * 2 + 2];
+point* points = (point*) malloc(sizeof(point) * (NUM_POINTS + NUM_OBSTACLES * 2 + 2));
 edge obstacles[NUM_OBSTACLES];
 const int s = 0;
 const int t = 1;
@@ -14,133 +14,149 @@ int num_points = p_start;
 void dispose_graph() {
 	for (int i = 0; i < num_points; i++) {
 		free(points[i].neighbours);
+		points[i].neighbours = NULL;
 	}
 }
 
-double* get_subcones(vec2 v, int* n) {
+double* get_subcones(point v, int* n) {
 
 	int n_subcones = 0;
 	double* subcone_bounds = (double*) malloc(0);
 
 	for (int i = 0; i < NUM_OBSTACLES; i++) {
-		vec2 p0 = obstacles[i].points[0];
-		vec2 p1 = obstacles[i].points[1];
+		point p0 = obstacles[i].points[0];
+		point p1 = obstacles[i].points[1];
 
-		vec2 end = {-1, -1};
-		if (v.x == p0.x && v.y == p0.y) end = p1;
-		if (v.x == p1.x && v.y == p1.y) end = p0;
-		if (end.x == -1) continue;
+		int end_x = -1, end_y = -1;
+		if (v.x == p0.x && v.y == p0.y) {end_x = p1.x; end_y = p1.y;}
+		if (v.x == p1.x && v.y == p1.y) {end_x = p0.x; end_y = p0.y;}
+		if (end_x == -1) continue;
 		
 		subcone_bounds = (double*) realloc(subcone_bounds, sizeof(double) * (n_subcones + 1));
-		subcone_bounds[n_subcones++] = atan2(end.y - v.y, end.x - v.x);
+		subcone_bounds[n_subcones++] = atan2(end_y - v.y, end_x - v.x);
 	}
 
 	*n = n_subcones;
 	return subcone_bounds;
 }
 
-cone* generate_cones(SDL_Renderer* renderer, point v, int* n_cones_out) {
+point** get_neighbours(SDL_Renderer* renderer, point* v, int* num_neighbours) {
 
 	int n_subcones;
-	double* subcone_bounds = get_subcones(v.pos, &n_subcones);
+	double* subcone_bounds = get_subcones(*v, &n_subcones);
 	int n_cones = NUM_CONES + n_subcones;
 
 	int curs = 0;
 	int subcone_curs = 0;
 	cone* cones = (cone*) malloc(sizeof(cone) * n_cones);
-	for (int i = 0; i < n_cones; i++) {
+	for (int i = 0; i < NUM_CONES; i++) {
 
 		// Find nearest visible point (bisect distance) in cone
 		double theta = -PI + (i / (double) NUM_CONES) * 2 * PI;
 		double thetaN = -PI + ((i+1) / (double) NUM_CONES) * 2 * PI;
 
-		edge bisect = {v.pos.x,
-					   v.pos.y,
-					   v.pos.x + cosf(theta + (thetaN - theta) / 2) * CONE_LENGTH,
-					   v.pos.y + sinf(theta + (thetaN - theta) / 2) * CONE_LENGTH};
+		point endpoint = {v->x + cosf(theta + (thetaN - theta) / 2) * CONE_LENGTH,
+						  v->y + sinf(theta + (thetaN - theta) / 2) * CONE_LENGTH,
+					      NULL, 0};
+
+		edge bisect = {*v, endpoint};
 
 		while (subcone_curs < n_subcones && thetaN > subcone_bounds[subcone_curs] && theta < subcone_bounds[subcone_curs]) {			
-			cones[curs++] = {v, NULL, pow(2, 31), theta, subcone_bounds[subcone_curs], bisect, 1, 1};
+			cones[curs++] = {*v, NULL, pow(2, 31), theta, subcone_bounds[subcone_curs], bisect, 1, 1};
 			theta = subcone_bounds[subcone_curs++];
 		}
 
-		cones[curs++] = {v, NULL, pow(2, 31), theta, thetaN, bisect, 1, 0};
+		cones[curs++] = {*v, NULL, pow(2, 31), theta, thetaN, bisect, 1, 0};
 	}
 
 	free(subcone_bounds);
 
+	point** neighbours = (point**) malloc(sizeof(point*) * n_cones);
+
 	for (int i = 0; i < n_cones; i++) {
 		
+		neighbours[i] = NULL;
 		cone c = cones[i];
 		double theta = c.cone_left_angle;
 		double thetaN = c.cone_right_angle;
+		printf("%lf %lf\n", theta, thetaN);
 		double min_bi_dist = pow(2, 31);
-		point* min_pt = c.closest_pt;
 		edge bisect = c.bisect;
 
-
-			printf("here1\n");
-			fflush(stdout);
 		for (int j = 0; j < num_points; j++) {
 
-			if (points[j].pos.x == v.pos.x && points[j].pos.y == v.pos.y) continue;
+			point u = points[j];
+			if (u.x == v->x && u.y == v->y) continue;
 
-			vec2 pt = points[j].pos;
-			double alpha = atan2(pt.y - v.pos.y, pt.x - v.pos.x);
+			double alpha = atan2(u.y - v->y, u.x - v->x);
 			// Point is not in current cone
 			if (alpha >= thetaN || alpha < theta) continue;
 			
-			double bisect_distance = get_orth_distance(points[j].pos, bisect);
-			if (bisect_distance >= cones[i].dist) continue;
+			double bisect_distance = get_orth_distance(u, bisect);
+			if (bisect_distance >= min_bi_dist) continue;
 			// Checks if the vector to the point intersects any walls
-			if (!is_visible(v.pos, points[j].pos, obstacles, NUM_OBSTACLES)) continue;
+			if (!is_visible(*v, u, obstacles, NUM_OBSTACLES)) continue;
 
-			cones[i].closest_pt = &points[j];
-			cones[i].dist = bisect_distance;
+			neighbours[i] = &points[j];
+			min_bi_dist = bisect_distance;
 		}
-			printf("here2\n");
-			fflush(stdout);
 	}
 
-	*n_cones_out = n_cones;
-	return cones;
+	free(cones);
+	*num_neighbours = n_cones;
+	return neighbours;
 }
 
 void generate_graph(SDL_Renderer* renderer) {
 	for (int i = 0; i < num_points; i++) {
-		int num_cones;
 
-		cone* cones = generate_cones(renderer, points[i], &num_cones);
-		for (int j = 0; j < num_cones; j++) {
-			if (cones[j].closest_pt == NULL) continue; 
 
-			bool valid = true;
-			for (int u = 0; u < points[i].num_neighbours; u++) {
-				if (cones[j].closest_pt == &points[i].neighbours[u]) {
-					valid = false;
-					break;
-				}
-			}
+		int num_neighbours;
+		point** neighbours = get_neighbours(renderer, &points[i], &num_neighbours);
 
-			if (valid) {
-				points[i].neighbours = (point*) realloc(points[i].neighbours, sizeof(point) * ++points[i].num_neighbours);
-				points[i].neighbours[points[i].num_neighbours - 1] = *cones[j].closest_pt;
-			}
+		bool valid = true;
+		for (int i = 0; i < num_neighbours; i++) {
+			if (neighbours[i] == NULL) continue;
+				points[i].num_neighbours++;
+				points[i].neighbours = (point**) realloc(points[i].neighbours, sizeof(point*) * points[i].num_neighbours);
+				points[i].neighbours[points[i].num_neighbours - 1] = neighbours[i];
+				// printf("%lf %lf %lf %lf neighbours after %d\n\n",v.x, v.y, neighbours[i]->x, neighbours[i]->y, v.num_neighbours);
+// 			for (int j = 0; j < v.num_neighbours; j++) {
+// 				if (v.neighbours[j]->x == neighbours[i]->x && v.neighbours[j]->y == neighbours[i]->y) {
+// 					valid = false;
+// 					break;
+// 				}
+// 			}
 
-			valid = true;
-			for (int u = 0; u < cones[j].closest_pt->num_neighbours; u++) {
-				if (&cones[j].closest_pt->neighbours[u] == &points[i]) {
-					valid = false;
-					break;
-				}
-			}
+// 			if (valid) {
+// 				printf("neighbours before %d\n", v.num_neighbours);
+// 				fflush(stdout);
+// 				printf("isnull %d\n", v.neighbours == NULL);
+// 				fflush(stdout);
+// 			}
+// 		}
+// printf("fuck\n");
+// 				fflush(stdout);
+// 		for (int j = 0; j < v.num_neighbours; j++) {
+// 			point* neighbour = v.neighbours[j];
+// 			printf("nullies %d\n", neighbour == NULL);
+// 				fflush(stdout);
+// 				printf("%d\n", neighbour->num_neighbours);
 
-			if (valid) {
-				cones[j].closest_pt->neighbours = (point*) realloc(points[i].neighbours, sizeof(point) * ++cones[j].closest_pt->num_neighbours);
-				cones[j].closest_pt->neighbours[cones[j].closest_pt->num_neighbours - 1] = *cones[j].closest_pt;
-			}
+// 			valid = true;
+// 			for (int u = 0; u < neighbour->num_neighbours; u++) {
+// 				if (v.x == neighbour->neighbours[u]->x && v.neighbours[j]->y == neighbour->neighbours[u]->y) {
+// 					valid = false;
+// 					break;
+// 				}
+// 			}
+
+// 			if (valid) {
+// 				neighbour->num_neighbours++;
+// 				neighbour->neighbours = (point**) realloc(neighbour->neighbours, sizeof(point*) * neighbour->num_neighbours);
+// 				neighbour->neighbours[neighbour->num_neighbours - 1] = &v;
+// 			}
 		}
-		free(cones);
 	}
 }
 
@@ -244,10 +260,9 @@ int main() {
 	for (int i = 0; i < NUM_OBSTACLES; i++) {
 		bool valid = true;
 		do {
-			obstacles[i] = {(double) (rand() % 1000),
-							(double) (rand() % 1000),
-							(double) (rand() % 1000),
-							(double) (rand() % 1000)};
+			point p1 = {(double) (rand() % 1000), (double) (rand() % 1000), NULL, 0};
+			point p2 = {(double) (rand() % 1000), (double) (rand() % 1000), NULL, 0};
+			obstacles[i] = {p1, p2};
 
 			for (int j = 0; j < i; j++) {
 				valid = get_intersect(obstacles[i],  obstacles[j]).x == -1;
@@ -255,28 +270,28 @@ int main() {
 			}
 		} while (!valid);
 
-		points[cur_point++] = {obstacles[i].points[0], NULL, 0};
-		points[cur_point++] = {obstacles[i].points[1], NULL, 0};
+		points[cur_point++] = obstacles[i].points[0];
+		points[cur_point++] = obstacles[i].points[1];
 	}
 
 	edge st;
 	do {
 
 		points[s] = {
-			{(double) (rand() % 1000),
-			 (double) (rand() % 1000)},
+			(double) (rand() % 1000),
+			(double) (rand() % 1000),
 			NULL,
 			0};
 
 		points[t] = {
-			{(double) (rand() % 1000),
-			 (double) (rand() % 1000)},
+			(double) (rand() % 1000),
+			(double) (rand() % 1000),
 			NULL,
 			0};
 
-		st = {points[s].pos, points[t].pos};
+		st = {points[s], points[t]};
 
-	} while (!is_visible(points[s].pos, points[t].pos, obstacles, NUM_OBSTACLES));
+	} while (!is_visible(points[s], points[t], obstacles, NUM_OBSTACLES));
 
 	generate_graph(renderer);
 
@@ -292,6 +307,7 @@ int main() {
 				case SDL_QUIT:
 					running = false;
 					dispose_graph();
+					free(points);
 					break;
 
 				case SDL_MOUSEMOTION:
@@ -300,11 +316,7 @@ int main() {
 
 				case SDL_MOUSEBUTTONDOWN:
 					SDL_GetMouseState(&mx, &my);
-					points[cur_point] = {
-						{(double) mx,
-						 (double) my},
-						NULL,
-						0};
+					points[cur_point] = {(double) mx, (double) my, NULL, 0};
 
 					cur_point = cur_point + 1 > p_end ? p_start : cur_point + 1;
 					num_points += num_points == p_end ? 0 : 1;
@@ -316,25 +328,17 @@ int main() {
 				case SDL_KEYDOWN:
 					switch (e.key.keysym.sym) {
 						case SDLK_s:
-							points[s] = {
-								{(double) mx,
-								 (double) my},
-								NULL,
-								0};
+							points[s] = {(double) mx, (double) my, NULL, 0};
 
-							st.points[0] = points[s].pos;
+							st.points[0] = points[s];
 							dispose_graph();
 							generate_graph(renderer);
 							break;
 
 						case SDLK_t:
-							points[t] = {
-								{(double) mx,
-								 (double) my},
-								NULL,
-								0};
+							points[t] = {(double) mx, (double) my, NULL, 0};
 
-							st.points[1] = points[t].pos;
+							st.points[1] = points[t];
 							dispose_graph();
 							generate_graph(renderer);
 							break;
@@ -347,12 +351,10 @@ int main() {
 			}
 		}
 
-		vec2 m = {(double) mx, (double) my};
-
 		SDL_SetRenderDrawColor(renderer, 0, 0, 0, 50);
 		SDL_RenderClear(renderer);
 
-		draw(renderer, points, num_points, obstacles, NUM_OBSTACLES, points[s].pos, points[t].pos);
+		draw(renderer, points, num_points, obstacles, NUM_OBSTACLES, points[s], points[t]);
 	}
 
     SDL_DestroyWindow(win);

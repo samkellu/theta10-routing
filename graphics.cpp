@@ -1,7 +1,7 @@
 #include "prog.h"
 #include "graphics.h"
 
-void draw_point(SDL_Renderer* renderer, vec2 pos, color c) {
+void draw_point(SDL_Renderer* renderer, point pos, color c) {
 
 	SDL_SetRenderDrawColor(renderer, c.r, c.g, c.b, c.a);
 	SDL_RenderDrawPoint(renderer, pos.x, pos.y);
@@ -15,7 +15,7 @@ void draw_point(SDL_Renderer* renderer, vec2 pos, color c) {
 	SDL_RenderDrawPoint(renderer, pos.x-1, pos.y+1);
 }
 
-void draw_tri(SDL_Renderer* renderer, vec2 v, color c, double theta, double thetaN, double a) {
+void draw_tri(SDL_Renderer* renderer, point v, color c, double theta, double thetaN, double a) {
 
 	double o = a * tanf(PI / NUM_CONES);
 	double h = sqrt(pow(a, 2) + pow(o, 2));
@@ -32,19 +32,21 @@ void draw_tri(SDL_Renderer* renderer, vec2 v, color c, double theta, double thet
 	SDL_RenderDrawLine(renderer, v.x, v.y, blx, bly);
 }
 
-void draw_line(SDL_Renderer* renderer, vec2 v1, vec2 v2, color c) {
+void draw_line(SDL_Renderer* renderer, point v1, point v2, color c) {
 	SDL_SetRenderDrawColor(renderer, c.r, c.g, c.b, c.a);
 	SDL_RenderDrawLine(renderer, v1.x, v1.y, v2.x, v2.y);
 }
 
-void draw(SDL_Renderer* renderer, point* points, int num_points, edge* obstacles, int num_obstacles, vec2 s, vec2 t) {
+void draw(SDL_Renderer* renderer, point* points, int num_points, edge* obstacles, int num_obstacles, point s, point t) {
 	for (int i = 2; i < num_points; i++) {
-		draw_point(renderer, points[i].pos, {255, 255, 255, 50});
+		draw_point(renderer, points[i], {255, 255, 255, 50});
 	}
 
     for (int i = 0; i < num_points; i++) {
+		printf("%d\n", points[i].num_neighbours);
         for (int j = 0; j < points[i].num_neighbours; j++) {
-            draw_line(renderer, points[i].pos, points[i].neighbours[j].pos, {100, 100, 100, 100});
+			printf("%lf %lf - %lf %lf\n",points[i].x, points[i].y, points[i].neighbours[j]->x, points[i].neighbours[j]->y);
+            draw_line(renderer, points[i], *points[i].neighbours[j], {100, 100, 100, 100});
         }
     }
 
@@ -53,8 +55,8 @@ void draw(SDL_Renderer* renderer, point* points, int num_points, edge* obstacles
 
 	SDL_SetRenderDrawColor(renderer, 0, 255, 0, 50);
 	for (int i = 0; i < NUM_OBSTACLES; i++) {
-		vec2 p0 = obstacles[i].points[0];
-		vec2 p1 = obstacles[i].points[1];
+		point p0 = obstacles[i].points[0];
+		point p1 = obstacles[i].points[1];
 		SDL_RenderDrawLine(renderer, p0.x, p0.y, p1.x, p1.y);
 	}
 

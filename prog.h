@@ -11,19 +11,15 @@
 #define NUM_OBSTACLES 8
 #define PI 3.14159
 
-struct vec2 {
-	double x;
-	double y;
-};
-
 struct point {
-    vec2 pos;
-    point* neighbours;
+    double x;
+	double y;
+    point** neighbours;
     int num_neighbours;
 };
 
 struct edge {
-	vec2 points[2];
+	point points[2];
 };
 
 struct cone {
@@ -35,11 +31,6 @@ struct cone {
 	edge bisect;
 	bool initialized;
 	bool is_subcone;
-};
-
-struct theta_graph {
-	cone* cones;
-	int n;
 };
 
 struct color {

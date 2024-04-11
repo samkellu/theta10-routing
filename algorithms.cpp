@@ -2,7 +2,7 @@
 #include "graphics.h"
 #include "algorithms.h"
 
-vec2 orth_project(vec2 v, edge edge) {
+point orth_project(point v, edge edge) {
 	double recip_m = -(edge.points[1].x - edge.points[0].x) / (edge.points[1].y - edge.points[0].y);
 	double m = (edge.points[1].y - edge.points[0].y) / (edge.points[1].x - edge.points[0].x);
 
@@ -15,19 +15,19 @@ vec2 orth_project(vec2 v, edge edge) {
 	return {x, y};
 }
 
-double get_orth_distance(vec2 v, edge edge) {
+double get_orth_distance(point v, edge edge) {
 	
-	vec2 projected = orth_project(v, edge);
+	point projected = orth_project(v, edge);
 	return sqrt(pow(edge.points[0].y - projected.y, 2) + pow(edge.points[0].x - projected.x, 2));
 }
 
-double get_distance_from_edge(vec2 v, edge edge) {
+double get_distance_from_edge(point v, edge edge) {
 	
-	vec2 projected = orth_project(v, edge);
+	point projected = orth_project(v, edge);
 	// check projected hit is on the line at all
 
-	vec2 high_x = edge.points[0];
-	vec2 low_x = edge.points[1];
+	point high_x = edge.points[0];
+	point low_x = edge.points[1];
 	if (low_x.x > high_x.x)
 		high_x = edge.points[1];
 		low_x = edge.points[0];
@@ -45,7 +45,7 @@ double get_distance_from_edge(vec2 v, edge edge) {
 	return sqrt(pow(v.y - projected.y, 2) + pow(v.x - projected.x, 2));
 }
 
-vec2 get_intersect(edge l1, edge l2) {
+point get_intersect(edge l1, edge l2) {
 
 	double x[] = {l2.points[0].x,
 				  l2.points[1].x,
@@ -71,13 +71,13 @@ vec2 get_intersect(edge l1, edge l2) {
 	return { x[0] + t * (x[1] - x[0]), y[0] + t * (y[1] - y[0]) };
 }
 
-bool is_visible(vec2 observer, vec2 pt, edge obstacles[], int n) {
+bool is_visible(point observer, point pt, edge obstacles[], int n) {
 
-	edge vis_edge = {observer.x, observer.y, pt.x, pt.y};
+	edge vis_edge = {observer, pt};
 	double distance = sqrt(pow(observer.x - pt.x, 2) + pow(observer.y - pt.y, 2));
 
 	for (int i = 0; i < n; i++) {
-		vec2 hit = get_intersect(vis_edge, obstacles[i]);
+		point hit = get_intersect(vis_edge, obstacles[i]);
 		double hit_dist = sqrt(pow(hit.y - observer.y, 2) + pow(hit.x - observer.x, 2));
 		if (hit_dist <= distance) return false;
 	}
@@ -85,7 +85,7 @@ bool is_visible(vec2 observer, vec2 pt, edge obstacles[], int n) {
 	return true;
 }
 
-cone bisect_alg(SDL_Renderer* renderer, vec2 cur_point, cone* cones, int n_cones, cone found_cone, vec2 s, vec2 t) {
+cone bisect_alg(SDL_Renderer* renderer, point cur_point, cone* cones, int n_cones, cone found_cone, point s, point t) {
 
 	edge e = {s, t};
 	cone best_cone;
@@ -107,8 +107,8 @@ cone bisect_alg(SDL_Renderer* renderer, vec2 cur_point, cone* cones, int n_cones
 		int cry = cur_point.y + CONE_LENGTH * sin(c.cone_right_angle);
 		SDL_RenderDrawLine(renderer, cur_point.x, cur_point.y, crx, cry);
 
-		double distance = get_distance_from_edge(c.closest_pt->pos, e);
-		if (c.closest_pt->pos.x == t.x && c.closest_pt->pos.y == t.y) return c;
+		double distance = get_distance_from_edge(*c.closest_pt, e);
+		if (c.closest_pt->x == t.x && c.closest_pt->y == t.y) return c;
 
 		if (distance < closest_dist) {
 			closest_dist = distance;
@@ -119,7 +119,7 @@ cone bisect_alg(SDL_Renderer* renderer, vec2 cur_point, cone* cones, int n_cones
 	return best_cone;
 }
 
-cone low_angle_alg(SDL_Renderer* renderer, vec2 cur_point, cone* cones, int n_cones, cone found_cone, vec2 s, vec2 t) {
+cone low_angle_alg(SDL_Renderer* renderer, point cur_point, cone* cones, int n_cones, cone found_cone, point s, point t) {
 
 	edge e = {s, t};
 	cone best_cone;
@@ -141,11 +141,11 @@ cone low_angle_alg(SDL_Renderer* renderer, vec2 cur_point, cone* cones, int n_co
 		int cry = cur_point.y + CONE_LENGTH * sin(c.cone_right_angle);
 		SDL_RenderDrawLine(renderer, cur_point.x, cur_point.y, crx, cry);
 
-		if (c.closest_pt->pos.x == t.x && c.closest_pt->pos.y == t.y) return c;
+		if (c.closest_pt->x == t.x && c.closest_pt->y == t.y) return c;
 
-		vec2 v_proj = orth_project(c.v.pos, e);
-		vec2 u_proj = orth_project(c.closest_pt->pos, e);
-		double o = get_distance_from_edge(c.closest_pt->pos, e);
+		point v_proj = orth_project(c.v, e);
+		point u_proj = orth_project(*c.closest_pt, e);
+		double o = get_distance_from_edge(*c.closest_pt, e);
 		double a = sqrt(pow(v_proj.y - u_proj.y, 2) + pow(v_proj.x - u_proj.x, 2));
 		double alpha = atan(o/a);
 		alpha *= alpha < 0 ? -1 : 1;
