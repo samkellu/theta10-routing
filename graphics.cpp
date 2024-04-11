@@ -37,10 +37,16 @@ void draw_line(SDL_Renderer* renderer, vec2 v1, vec2 v2, color c) {
 	SDL_RenderDrawLine(renderer, v1.x, v1.y, v2.x, v2.y);
 }
 
-void draw(SDL_Renderer* renderer, vec2* points, int num_points, edge* obstacles, int num_obstacles, vec2 s, vec2 t) {
+void draw(SDL_Renderer* renderer, point* points, int num_points, edge* obstacles, int num_obstacles, vec2 s, vec2 t) {
 	for (int i = 2; i < num_points; i++) {
-		draw_point(renderer, points[i], {255, 255, 255, 50});
+		draw_point(renderer, points[i].pos, {255, 255, 255, 50});
 	}
+
+    for (int i = 0; i < num_points; i++) {
+        for (int j = 0; j < points[i].num_neighbours; j++) {
+            draw_line(renderer, points[i].pos, points[i].neighbours[j].pos, {100, 100, 100, 100});
+        }
+    }
 
 	draw_point(renderer, s, {255, 0, 0, 255});
 	draw_point(renderer, t, {0, 0, 255, 255});

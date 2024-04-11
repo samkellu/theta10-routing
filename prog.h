@@ -16,13 +16,19 @@ struct vec2 {
 	double y;
 };
 
+struct point {
+    vec2 pos;
+    point* neighbours;
+    int num_neighbours;
+};
+
 struct edge {
 	vec2 points[2];
 };
 
 struct cone {
-	vec2 v;
-	vec2 closest_pt;
+	point v;
+	point* closest_pt;
 	double dist;
 	double cone_left_angle;
 	double cone_right_angle;

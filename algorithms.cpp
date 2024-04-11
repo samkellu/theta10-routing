@@ -107,8 +107,8 @@ cone bisect_alg(SDL_Renderer* renderer, vec2 cur_point, cone* cones, int n_cones
 		int cry = cur_point.y + CONE_LENGTH * sin(c.cone_right_angle);
 		SDL_RenderDrawLine(renderer, cur_point.x, cur_point.y, crx, cry);
 
-		double distance = get_distance_from_edge(c.closest_pt, e);
-		if (c.closest_pt.x == t.x && c.closest_pt.y == t.y) return c;
+		double distance = get_distance_from_edge(c.closest_pt->pos, e);
+		if (c.closest_pt->pos.x == t.x && c.closest_pt->pos.y == t.y) return c;
 
 		if (distance < closest_dist) {
 			closest_dist = distance;
@@ -141,11 +141,11 @@ cone low_angle_alg(SDL_Renderer* renderer, vec2 cur_point, cone* cones, int n_co
 		int cry = cur_point.y + CONE_LENGTH * sin(c.cone_right_angle);
 		SDL_RenderDrawLine(renderer, cur_point.x, cur_point.y, crx, cry);
 
-		if (c.closest_pt.x == t.x && c.closest_pt.y == t.y) return c;
+		if (c.closest_pt->pos.x == t.x && c.closest_pt->pos.y == t.y) return c;
 
-		vec2 v_proj = orth_project(c.v, e);
-		vec2 u_proj = orth_project(c.closest_pt, e);
-		double o = get_distance_from_edge(c.closest_pt, e);
+		vec2 v_proj = orth_project(c.v.pos, e);
+		vec2 u_proj = orth_project(c.closest_pt->pos, e);
+		double o = get_distance_from_edge(c.closest_pt->pos, e);
 		double a = sqrt(pow(v_proj.y - u_proj.y, 2) + pow(v_proj.x - u_proj.x, 2));
 		double alpha = atan(o/a);
 		alpha *= alpha < 0 ? -1 : 1;
