@@ -119,10 +119,10 @@ cone bisect_alg(SDL_Renderer* renderer, point cur_point, cone* cones, int n_cone
 	return best_cone;
 }
 
-point* low_angle_alg(SDL_Renderer* renderer, point cur_point, point s, point t) {
+canonical_triangle* low_angle_alg(SDL_Renderer* renderer, point cur_point, point s, point t) {
 
 	edge e = {s, t};
-	point* best_point = NULL;
+	canonical_triangle* best = NULL;
 
 	double best_angle = 360;
 	SDL_SetRenderDrawColor(renderer, 100, 100, 100, 100);
@@ -140,11 +140,11 @@ point* low_angle_alg(SDL_Renderer* renderer, point cur_point, point s, point t) 
 		// int cry = cur_point.y + CONE_LENGTH * sin(c.cone_right_angle);
 		// SDL_RenderDrawLine(renderer, cur_point.x, cur_point.y, crx, cry);
 
-		if (cur_point.neighbours[i]->x == t.x && cur_point.neighbours[i]->y == t.y) return cur_point.neighbours[i];
+		if (cur_point.neighbours[i]->p->x == t.x && cur_point.neighbours[i]->p->y == t.y) return cur_point.neighbours[i];
 
 		point v_proj = orth_project(cur_point, e);
-		point u_proj = orth_project(*cur_point.neighbours[i], e);
-		double o = get_distance_from_edge(*cur_point.neighbours[i], e);
+		point u_proj = orth_project(*cur_point.neighbours[i]->p, e);
+		double o = get_distance_from_edge(*cur_point.neighbours[i]->p, e);
 		double a = sqrt(pow(v_proj.y - u_proj.y, 2) + pow(v_proj.x - u_proj.x, 2));
 		double alpha = atan(o/a);
 
@@ -155,7 +155,7 @@ point* low_angle_alg(SDL_Renderer* renderer, point cur_point, point s, point t) 
 		alpha *= alpha < 0 ? -1 : 1;
 		if (alpha < best_angle) {
 			best_angle = alpha;
-			best_point = cur_point.neighbours[i];
+			best = cur_point.neighbours[i];
 		}
 
 		// stay on the st side of any constraint
@@ -163,5 +163,5 @@ point* low_angle_alg(SDL_Renderer* renderer, point cur_point, point s, point t) 
 		// if subcone -> chose closer of two vertices
 	}
 
-	return best_point;
+	return best;
 }

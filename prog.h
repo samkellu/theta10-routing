@@ -11,19 +11,21 @@
 #define NUM_OBSTACLES 8
 #define PI 3.14159
 
+struct canonical_triangle;
+
 struct point {
     double x;
 	double y;
-    point** neighbours;
+    canonical_triangle** neighbours;
     int num_neighbours;
 };
 
 struct canonical_triangle {
-	point* point;
+	point* p;
 	double al;
 	double ar;
 	double bisect_distance;
-}
+};
 
 struct edge {
 	point points[2];

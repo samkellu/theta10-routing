@@ -13,13 +13,16 @@ int num_points = p_start;
 
 void dispose_graph() {
 	for (int i = 0; i < num_points; i++) {
+		for (int j = 0; j < points[i].num_neighbours; j++)
+			free(points[i].neighbours[j]);
+
 		free(points[i].neighbours);
 		points[i].neighbours = NULL;
 		points[i].num_neighbours = 0;
 	}
 }
 
-point* get_theta_point(point v, double al, double ar) {
+canonical_triangle* get_canonical_tri(point v, double al, double ar) {
 
 	point bisect_end = {
 		v.x + cosf(al + (ar - al) / 2) * CONE_LENGTH,
@@ -28,11 +31,10 @@ point* get_theta_point(point v, double al, double ar) {
 	};
 
 	edge bisect = {v, bisect_end};
-	point* best_point = NULL;
+	canonical_triangle best = {NULL, 0, 0, 0};
 	double min_bi_dist = pow(2, 31);
 
 	for (int j = 0; j < num_points; j++) {
-
 		if (points[j].x == v.x && points[j].y == v.y) continue;
 
 		double alpha = atan2(points[j].y - v.y, points[j].x - v.x);
@@ -44,14 +46,20 @@ point* get_theta_point(point v, double al, double ar) {
 		// Checks if the vector to the point intersects any walls
 		if (!is_visible(v, points[j], obstacles, NUM_OBSTACLES)) continue;
 
-		best_point = &points[j];
+		best = {&points[j], al, ar, bisect_distance};
 		min_bi_dist = bisect_distance;
 	}
 
-	return best_point;
+	if (best.p != NULL) {
+		canonical_triangle* ret_tri = (canonical_triangle*) malloc(sizeof(canonical_triangle));
+		*ret_tri = best;
+		return ret_tri;
+	}
+
+	return NULL;
 }
 
-int get_neighbours(SDL_Renderer* renderer, point v, point*** neighbours) {
+int get_neighbours(SDL_Renderer* renderer, point v, canonical_triangle*** neighbours) {
 
 	int num_subcones = 0;
 	double* subcone_bounds = NULL;
@@ -71,27 +79,26 @@ int get_neighbours(SDL_Renderer* renderer, point v, point*** neighbours) {
 
 	int num_neighbours = 0;
 	int subcone_curs = 0;
-	point** to_add = NULL;
+	canonical_triangle** to_add = NULL;
 	for (int i = 0; i < NUM_CONES; i++) {
 
 		// Find nearest visible point (bisect distance) in cone
 		double al = -PI + (i / (double) NUM_CONES) * 2 * PI;
 		double ar = -PI + ((i+1) / (double) NUM_CONES) * 2 * PI;
-
 		while (subcone_curs < num_subcones && ar > subcone_bounds[subcone_curs] && al < subcone_bounds[subcone_curs]) {
-			point* best_point = get_theta_point(v, al, subcone_bounds[subcone_curs]);
+			canonical_triangle* best = get_canonical_tri(v, al, subcone_bounds[subcone_curs]);
 			al = subcone_bounds[subcone_curs++];
-			if (best_point == NULL) continue;
+			if (best == NULL) continue;
 
-			to_add = (point**) realloc(to_add, sizeof(point*) * ++num_neighbours);
-			to_add[num_neighbours - 1] = best_point;
+			to_add = (canonical_triangle**) realloc(to_add, sizeof(canonical_triangle*) * ++num_neighbours);
+			to_add[num_neighbours - 1] = best;
 		}
 
-		point* best_point = get_theta_point(v, al, ar);
-		if (best_point == NULL) continue;
+		canonical_triangle* best = get_canonical_tri(v, al, ar);
+		if (best == NULL) continue;
 
-		to_add = (point**) realloc(to_add, sizeof(point*) * ++num_neighbours);
-		to_add[num_neighbours - 1] = best_point;
+		to_add = (canonical_triangle**) realloc(to_add, sizeof(canonical_triangle*) * ++num_neighbours);
+		to_add[num_neighbours - 1] = best;				
 	}
 
 	free(subcone_bounds);
@@ -103,39 +110,41 @@ void generate_graph(SDL_Renderer* renderer) {
 
 	for (int i = 0; i < num_points; i++) {
 
-		point** neighbours = NULL;
+		canonical_triangle** neighbours = NULL;
 		int num_neighbours = get_neighbours(renderer, points[i], &neighbours);
 		for (int j = 0; j < num_neighbours; j++) {
 
 			bool valid = true;
 			for (int u = 0; u < points[i].num_neighbours; u++) {
-
-				if (points[i].neighbours[u] == neighbours[j]) {
+				if (points[i].neighbours[u]->p == neighbours[j]->p) {
 					valid = false;
 					break;
 				}
 			}
 
 			if (valid) {
-				points[i].neighbours = (point**) realloc(points[i].neighbours, sizeof(point*) * ++points[i].num_neighbours);
+				points[i].neighbours = (canonical_triangle**) realloc(points[i].neighbours, sizeof(canonical_triangle*) * ++points[i].num_neighbours);
 				points[i].neighbours[points[i].num_neighbours - 1] = neighbours[j];
 			}
 
 			valid = true;
-			for (int u = 0; u < neighbours[j]->num_neighbours; u++) {
-				if (&points[i] == neighbours[j]) {
+			for (int u = 0; u < neighbours[j]->p->num_neighbours; u++) {
+				if (&points[i] == neighbours[j]->p) {
 					valid = false;
 					break;
 				}
 			}
 
 			if (valid) {
-				neighbours[j]->neighbours = (point**) realloc(neighbours[j]->neighbours, sizeof(point*) * ++neighbours[j]->num_neighbours);
-				neighbours[j]->neighbours[neighbours[j]->num_neighbours - 1] = &points[i];
+				neighbours[j]->p->neighbours = (canonical_triangle**) realloc(neighbours[j]->p->neighbours, sizeof(canonical_triangle*) * ++neighbours[j]->p->num_neighbours);
+				canonical_triangle* new_tri = (canonical_triangle*) malloc(sizeof(canonical_triangle));
+				*new_tri = {&points[i], 0, 0, 0};
+				neighbours[j]->p->neighbours[neighbours[j]->p->num_neighbours - 1] = new_tri;
 			}
 		}
 	}
 }
+
 void route(SDL_Renderer* renderer) {
 
 	SDL_SetRenderDrawColor(renderer, 0, 0, 0, 50);
@@ -147,20 +156,21 @@ void route(SDL_Renderer* renderer) {
 	while (max_steps-- >= 0) {
 
 		// cone best_cone = bisect_alg(renderer, cur_point, cones, n_cones, found_cone, points[s], points[t]);
-		point* best_point = low_angle_alg(renderer, cur_point, points[s], points[t]);
+		canonical_triangle* best = low_angle_alg(renderer, cur_point, points[s], points[t]);
 		
-		if (best_point == NULL) {
+		if (best == NULL) {
 			printf("Failed to find route\n");
 			break;
 		}
 
 		// add canonical triangle back
 		// draw_tri(renderer, cur_point, {255, 0, 0, 150}, best_cone.cone_left_angle, best_cone.cone_right_angle, best_cone.dist);
-		draw_line(renderer, cur_point, *best_point, {255, 0, 0, 150});
+		draw_line(renderer, cur_point, *(best->p), {255, 0, 0, 150});
+		draw_tri(renderer, cur_point, *best, {255, 0, 0, 150});
 
 		SDL_RenderPresent(renderer);
 		SDL_Delay(1000);
-		if (best_point->x == points[t].x && best_point->y == points[t].y) break;
+		if (best->p->x == points[t].x && best->p->y == points[t].y) break;
 
 		// SDL_SetRenderDrawColor(renderer, 0, 0, 0, 0);
 		// for (int i = 0; i < n_cones; i++) {
@@ -177,7 +187,7 @@ void route(SDL_Renderer* renderer) {
 		// draw_tri(renderer, cur_point, {255, 0, 0, 150}, best_cone.cone_left_angle, best_cone.cone_right_angle, best_cone.dist);
 		// draw_line(renderer, cur_point, best_pt, {255, 0, 0, 150});
 
-		cur_point = *best_point; 
+		cur_point = *best->p; 
 	}
 
 	SDL_Delay(2000);
@@ -307,7 +317,7 @@ int main() {
 
 		draw(renderer, points, num_points, obstacles, NUM_OBSTACLES, points[s], points[t]);
 		for (int j = 0; j < p.num_neighbours; j++) {
-            draw_line(renderer, p, *p.neighbours[j], {100, 100, 100, 100});
+            draw_line(renderer, p, *p.neighbours[j]->p, {100, 100, 100, 100});
         }
 		SDL_RenderPresent(renderer);
 

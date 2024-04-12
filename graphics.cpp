@@ -15,22 +15,22 @@ void draw_point(SDL_Renderer* renderer, point pos, color c) {
 	SDL_RenderDrawPoint(renderer, pos.x-1, pos.y+1);
 }
 
-void draw_tri(SDL_Renderer* renderer, point v, point u) {
+void draw_tri(SDL_Renderer* renderer, point p, canonical_triangle tri, color c) {
 
-	double alpha = atan2(u.y - v.y, u.x - v.x);
-	double o = a * tanf(PI / NUM_CONES);
+	double a = tri.bisect_distance;
+	double o = a * tanf((tri.ar - tri.al) / 2);
 	double h = sqrt(pow(a, 2) + pow(o, 2));
 
 	// Draw triangle
-	int blx = v.x + h * cosf(theta);
-	int bly = v.y + h * sinf(theta);
-	int brx = v.x + h * cosf(thetaN);
-	int bry = v.y + h * sinf(thetaN);
+	int blx = p.x + h * cosf(tri.al);
+	int bly = p.y + h * sinf(tri.al);
+	int brx = p.x + h * cosf(tri.ar);
+	int bry = p.y + h * sinf(tri.ar);
 
 	SDL_SetRenderDrawColor(renderer, c.r, c.g, c.b, c.a);
 	SDL_RenderDrawLine(renderer, blx, bly, brx, bry);
-	SDL_RenderDrawLine(renderer, v.x, v.y, brx, bry);
-	SDL_RenderDrawLine(renderer, v.x, v.y, blx, bly);
+	SDL_RenderDrawLine(renderer, p.x, p.y, brx, bry);
+	SDL_RenderDrawLine(renderer, p.x, p.y, blx, bly);
 }
 
 void draw_line(SDL_Renderer* renderer, point v1, point v2, color c) {
@@ -45,7 +45,7 @@ void draw(SDL_Renderer* renderer, point* points, int num_points, edge* obstacles
 
     for (int i = 0; i < num_points; i++) {
         for (int j = 0; j < points[i].num_neighbours; j++) {
-            draw_line(renderer, points[i], *points[i].neighbours[j], {100, 100, 100, 100});
+            draw_line(renderer, points[i], *points[i].neighbours[j]->p, {100, 100, 100, 100});
         }
     }
 
