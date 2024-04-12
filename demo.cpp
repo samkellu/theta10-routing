@@ -17,8 +17,6 @@ void dispose_graph() {
 		points[i].neighbours = NULL;
 		points[i].num_neighbours = 0;
 	}
-	printf("Disposed successfully\n");
-	fflush(stdout);
 }
 
 point* get_theta_point(point v, double al, double ar) {
@@ -138,80 +136,53 @@ void generate_graph(SDL_Renderer* renderer) {
 		}
 	}
 }
-// void route(SDL_Renderer* renderer) {
+void route(SDL_Renderer* renderer) {
 
-// 	SDL_SetRenderDrawColor(renderer, 0, 0, 0, 50);
-// 	SDL_RenderClear(renderer);
-// 	draw(renderer, points, num_points, obstacles, NUM_OBSTACLES, points[s], points[t]);
+	SDL_SetRenderDrawColor(renderer, 0, 0, 0, 50);
+	SDL_RenderClear(renderer);
+	draw(renderer, points, num_points, obstacles, NUM_OBSTACLES, points[s], points[t]);
 
-// 	vec2 cur_point = points[s];
-// 	cone* cones;
-// 	int max_steps = 20;
-// 	while (max_steps-- >= 0) {
-// 		int n_cones = 0;
-// 		cones = generate_cones(renderer, cur_point, &n_cones);
+	point cur_point = points[s];
+	int max_steps = 20;
+	while (max_steps-- >= 0) {
 
-// 		cone found_cone; 
-// 		found_cone.initialized = false;
-// 		double t_angle = atan2(points[t].y - cur_point.y, points[t].x - cur_point.x);
-// 		for (int i = 0; i < n_cones; i++) {
-// 			cone c = cones[i];
-// 			if (t_angle > c.cone_left_angle && t_angle <= c.cone_right_angle) {
-// 				found_cone = c;
-// 				break;
-// 			}
-// 		}
-
-// 		if (!found_cone.initialized) {
-// 			printf("No bueno\n");
-// 			return;
-// 		}
-
-// 		printf("fc %d %d\n", found_cone.closest_pt.x, found_cone.closest_pt.y);
-// 		// cone best_cone = bisect_alg(renderer, cur_point, cones, n_cones, found_cone, points[s], points[t]);
-// 		cone best_cone = low_angle_alg(renderer, cur_point, cones, n_cones, found_cone, points[s], points[t]);
+		// cone best_cone = bisect_alg(renderer, cur_point, cones, n_cones, found_cone, points[s], points[t]);
+		point* best_point = low_angle_alg(renderer, cur_point, points[s], points[t]);
 		
-// 		if (!best_cone.initialized) {
-// 			printf("Failed to find good cone\n");
-// 			break;
-// 		}
+		if (best_point == NULL) {
+			printf("Failed to find route\n");
+			break;
+		}
 
-// 		vec2 best_pt = best_cone.closest_pt;
+		// add canonical triangle back
+		// draw_tri(renderer, cur_point, {255, 0, 0, 150}, best_cone.cone_left_angle, best_cone.cone_right_angle, best_cone.dist);
+		draw_line(renderer, cur_point, *best_point, {255, 0, 0, 150});
 
-// 		draw_tri(renderer, cur_point, {255, 0, 0, 150}, best_cone.cone_left_angle, best_cone.cone_right_angle, best_cone.dist);
-// 		draw_line(renderer, cur_point, best_pt, {255, 0, 0, 150});
+		SDL_RenderPresent(renderer);
+		SDL_Delay(1000);
+		if (best_point->x == points[t].x && best_point->y == points[t].y) break;
 
-// 		SDL_RenderPresent(renderer);
-// 		SDL_Delay(1000);
-// 		if (best_pt.x == points[t].x && best_pt.y == points[t].y) break;
-// 		if (cur_point.x == best_pt.x && cur_point.y == best_pt.y) break;
-
-// 		SDL_SetRenderDrawColor(renderer, 0, 0, 0, 0);
-// 		for (int i = 0; i < n_cones; i++) {
-// 			cone c = cones[i];
+		// SDL_SetRenderDrawColor(renderer, 0, 0, 0, 0);
+		// for (int i = 0; i < n_cones; i++) {
+		// 	cone c = cones[i];
 		
-// 			int cx = cur_point.x + CONE_LENGTH * sin(c.cone_left_angle);
-// 			int cy = cur_point.y + CONE_LENGTH * cos(c.cone_left_angle);
-// 			SDL_RenderDrawLine(renderer, cur_point.x, cur_point.y, cx, cy);
-// 			int crx = cur_point.x + CONE_LENGTH * sin(c.cone_right_angle);
-// 			int cry = cur_point.y + CONE_LENGTH * cos(c.cone_right_angle);
-// 			SDL_RenderDrawLine(renderer, cur_point.x, cur_point.y, crx, cry);
-// 		}
+		// 	int cx = cur_point.x + CONE_LENGTH * sin(c.cone_left_angle);
+		// 	int cy = cur_point.y + CONE_LENGTH * cos(c.cone_left_angle);
+		// 	SDL_RenderDrawLine(renderer, cur_point.x, cur_point.y, cx, cy);
+		// 	int crx = cur_point.x + CONE_LENGTH * sin(c.cone_right_angle);
+		// 	int cry = cur_point.y + CONE_LENGTH * cos(c.cone_right_angle);
+		// 	SDL_RenderDrawLine(renderer, cur_point.x, cur_point.y, crx, cry);
+		// }
 
-// 		draw_tri(renderer, cur_point, {255, 0, 0, 150}, best_cone.cone_left_angle, best_cone.cone_right_angle, best_cone.dist);
-// 		draw_line(renderer, cur_point, best_pt, {255, 0, 0, 150});
+		// draw_tri(renderer, cur_point, {255, 0, 0, 150}, best_cone.cone_left_angle, best_cone.cone_right_angle, best_cone.dist);
+		// draw_line(renderer, cur_point, best_pt, {255, 0, 0, 150});
 
-// 		SDL_RenderPresent(renderer);
-// 		cur_point = best_pt; 
+		cur_point = *best_point; 
+	}
 
-// 		free(cones);
-// 		cones = NULL;
-// 	}
-
-// 	if (cones) free(cones);
-// 	SDL_Delay(2000);
-// 	return;
-// }
+	SDL_Delay(2000);
+	return;
+}
 
 int main() {
 
@@ -322,7 +293,7 @@ int main() {
 							break;
 
 						case SDLK_SPACE:
-							// route(renderer);
+							route(renderer);
 							break;
 					}
 					break;
