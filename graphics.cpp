@@ -43,9 +43,7 @@ void draw(SDL_Renderer* renderer, point* points, int num_points, edge* obstacles
 	}
 
     for (int i = 0; i < num_points; i++) {
-		printf("%d\n", points[i].num_neighbours);
         for (int j = 0; j < points[i].num_neighbours; j++) {
-			printf("%lf %lf - %lf %lf\n",points[i].x, points[i].y, points[i].neighbours[j]->x, points[i].neighbours[j]->y);
             draw_line(renderer, points[i], *points[i].neighbours[j], {100, 100, 100, 100});
         }
     }

@@ -5,7 +5,7 @@
 #include <stdlib.h>
 #include <time.h>
 
-#define CONE_LENGTH 1000
+#define CONE_LENGTH 2000
 #define NUM_CONES 10
 #define NUM_POINTS 25
 #define NUM_OBSTACLES 8
