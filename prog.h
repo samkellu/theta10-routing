@@ -18,6 +18,13 @@ struct point {
     int num_neighbours;
 };
 
+struct canonical_triangle {
+	point* point;
+	double al;
+	double ar;
+	double bisect_distance;
+}
+
 struct edge {
 	point points[2];
 };

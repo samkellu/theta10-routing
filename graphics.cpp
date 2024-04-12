@@ -15,8 +15,9 @@ void draw_point(SDL_Renderer* renderer, point pos, color c) {
 	SDL_RenderDrawPoint(renderer, pos.x-1, pos.y+1);
 }
 
-void draw_tri(SDL_Renderer* renderer, point v, color c, double theta, double thetaN, double a) {
+void draw_tri(SDL_Renderer* renderer, point v, point u) {
 
+	double alpha = atan2(u.y - v.y, u.x - v.x);
 	double o = a * tanf(PI / NUM_CONES);
 	double h = sqrt(pow(a, 2) + pow(o, 2));
 
