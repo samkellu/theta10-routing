@@ -23,7 +23,7 @@ void dispose_graph() {
 }
 
 canonical_triangle* get_canonical_tri(point v, double al, double ar) {
-
+ 
 	point bisect_end = {
 		v.x + cosf(al + (ar - al) / 2) * CONE_LENGTH,
 		v.y + sinf(al + (ar - al) / 2) * CONE_LENGTH,
@@ -31,7 +31,8 @@ canonical_triangle* get_canonical_tri(point v, double al, double ar) {
 	};
 
 	edge bisect = {v, bisect_end};
-	canonical_triangle best = {NULL, 0, 0, 0};
+	canonical_triangle* best = (canonical_triangle*) malloc(sizeof(canonical_triangle));
+	*best = {NULL, al, ar, 0};
 	double min_bi_dist = pow(2, 31);
 
 	for (int j = 0; j < num_points; j++) {
@@ -46,17 +47,20 @@ canonical_triangle* get_canonical_tri(point v, double al, double ar) {
 		// Checks if the vector to the point intersects any walls
 		if (!is_visible(v, points[j], obstacles, NUM_OBSTACLES)) continue;
 
-		best = {&points[j], al, ar, bisect_distance};
+		best->p = &points[j];
+		best->bisect_distance = bisect_distance;
 		min_bi_dist = bisect_distance;
 	}
 
-	if (best.p != NULL) {
-		canonical_triangle* ret_tri = (canonical_triangle*) malloc(sizeof(canonical_triangle));
-		*ret_tri = best;
-		return ret_tri;
+	printf("%lf %lf\n", best->al, best->ar);
+
+	if (best->p == NULL) {
+		free(best);
+		return NULL;
 	}
 
-	return NULL;
+
+	return best;
 }
 
 int get_neighbours(SDL_Renderer* renderer, point v, canonical_triangle*** neighbours) {
@@ -138,7 +142,7 @@ void generate_graph(SDL_Renderer* renderer) {
 			if (valid) {
 				neighbours[j]->p->neighbours = (canonical_triangle**) realloc(neighbours[j]->p->neighbours, sizeof(canonical_triangle*) * ++neighbours[j]->p->num_neighbours);
 				canonical_triangle* new_tri = (canonical_triangle*) malloc(sizeof(canonical_triangle));
-				*new_tri = {&points[i], 0, 0, 0};
+				*new_tri = *neighbours[j];
 				neighbours[j]->p->neighbours[neighbours[j]->p->num_neighbours - 1] = new_tri;
 			}
 		}
@@ -163,8 +167,6 @@ void route(SDL_Renderer* renderer) {
 			break;
 		}
 
-		// add canonical triangle back
-		// draw_tri(renderer, cur_point, {255, 0, 0, 150}, best_cone.cone_left_angle, best_cone.cone_right_angle, best_cone.dist);
 		draw_line(renderer, cur_point, *(best->p), {255, 0, 0, 150});
 		draw_tri(renderer, cur_point, *best, {255, 0, 0, 150});
 
