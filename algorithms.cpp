@@ -85,38 +85,51 @@ bool is_visible(point observer, point pt, edge obstacles[], int n) {
 	return true;
 }
 
-cone bisect_alg(SDL_Renderer* renderer, point cur_point, cone* cones, int n_cones, cone found_cone, point s, point t) {
+canonical_triangle* bisect_alg(SDL_Renderer* renderer, point cur_point, point s, point t) {
 
 	edge e = {s, t};
-	cone best_cone;
-	best_cone.initialized = false;
+	canonical_triangle* best = NULL;
 
-	double closest_dist = pow(2, 31);
+	double best_gradient = (t.y - s.y) / (t.x - s.x);
 	SDL_SetRenderDrawColor(renderer, 100, 100, 100, 100);
-	double found_cone_bisect_angle = found_cone.cone_left_angle + (found_cone.cone_right_angle - found_cone.cone_left_angle) / 2;
-	for (int i = 0; i < n_cones; i++) {
+	double dx = (s.x - t.x);
+	double dy = (s.y - t.y);
 
-		cone c = cones[i];
-		if (c.cone_left_angle + (PI/2) < found_cone_bisect_angle || c.cone_right_angle - (PI/2) > found_cone_bisect_angle)
-			continue;
+	point cur_project = orth_project(cur_point, e);
+	// angle from projection to curpoint is vect normal of st
 
-		int cx = cur_point.x + CONE_LENGTH * cos(c.cone_left_angle);
-		int cy = cur_point.y + CONE_LENGTH * sin(c.cone_left_angle);
-		SDL_RenderDrawLine(renderer, cur_point.x, cur_point.y, cx, cy);
-		int crx = cur_point.x + CONE_LENGTH * cos(c.cone_right_angle);
-		int cry = cur_point.y + CONE_LENGTH * sin(c.cone_right_angle);
-		SDL_RenderDrawLine(renderer, cur_point.x, cur_point.y, crx, cry);
+	// Only check edges above haflplane of st facing t.
+	// Check chain on current side of st first
+	// Sweep edges from wlog. left to right relative to v from halfplane st
 
-		double distance = get_distance_from_edge(*c.closest_pt, e);
-		if (c.closest_pt->x == t.x && c.closest_pt->y == t.y) return c;
-
-		if (distance < closest_dist) {
-			closest_dist = distance;
-			best_cone = c;
-		}
+	double halfplane_l = atan2(t.y - cur_project.y, t.x - cur_project.x);
+	double halfplane_r = atan2(t.y - s.y, t.x - s.x);
+	
+	if (halfplane_l > halfplane_r) {
+		double tmp = halfplane_l;
+		halfplane_l = halfplane_r;
+		halfplane_r = tmp; 
 	}
 
-	return best_cone;
+	for (int i = 0; i < cur_point.num_neighbours; i++) {
+
+		canonical_triangle* neighbour_tri = cur_point.neighbours[i];
+		point* neighbour = neighbour_tri->p;
+		double neighbour_angle = atan2(neighbour->y - cur_project.y, neighbour->x - cur_project.x);
+		double neighbour_cur_angle = 0;
+		if (neighbour->x != cur_point.x)
+			neighbour_cur_angle = (neighbour->y - cur_point.y) / (neighbour->x - cur_point.x);
+
+		bool is_valid = (neighbour->x == t.x && neighbour->y == t.y) && neighbour_angle >= halfplane_l && neighbour_angle <= halfplane_r && neighbour_cur_angle < best_gradient;
+		if (!is_valid) continue;
+
+		best_gradient = neighbour_cur_angle;
+		best = cur_point.neighbours[i];
+		// point is on the same side of st as cur_point
+		// point is above halfplane through st facing t 
+	}
+
+	return best;
 }
 
 canonical_triangle* low_angle_alg(SDL_Renderer* renderer, point cur_point, point s, point t) {

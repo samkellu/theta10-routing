@@ -159,8 +159,8 @@ void route(SDL_Renderer* renderer) {
 	int max_steps = 20;
 	while (max_steps-- >= 0) {
 
-		// cone best_cone = bisect_alg(renderer, cur_point, cones, n_cones, found_cone, points[s], points[t]);
-		canonical_triangle* best = low_angle_alg(renderer, cur_point, points[s], points[t]);
+		canonical_triangle* best = bisect_alg(renderer, cur_point, points[s], points[t]);
+		// canonical_triangle* best = low_angle_alg(renderer, cur_point, points[s], points[t]);
 		
 		if (best == NULL) {
 			printf("Failed to find route\n");
