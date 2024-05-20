@@ -52,8 +52,6 @@ canonical_triangle* get_canonical_tri(point v, double al, double ar) {
 		min_bi_dist = bisect_distance;
 	}
 
-	printf("%lf %lf\n", best->al, best->ar);
-
 	if (best->p == NULL) {
 		free(best);
 		return NULL;

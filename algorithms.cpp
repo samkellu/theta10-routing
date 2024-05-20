@@ -90,43 +90,57 @@ canonical_triangle* bisect_alg(SDL_Renderer* renderer, point cur_point, point s,
 	edge e = {s, t};
 	canonical_triangle* best = NULL;
 
-	double best_gradient = (t.y - s.y) / (t.x - s.x);
+	double alpha = atan2(t.x - s.x, t.y - s.y);
+	double best_diff = PI;
 	SDL_SetRenderDrawColor(renderer, 100, 100, 100, 100);
-	double dx = (s.x - t.x);
-	double dy = (s.y - t.y);
+	double region_l = alpha - PI/2;
+	double region_r = alpha + PI/2;
+	double target = alpha;
+	point cur_proj = orth_project(cur_point, e);
 
-	point cur_project = orth_project(cur_point, e);
+	if (cur_point.x != s.x && cur_point.y != s.y) {
+		double proj_angle = atan2(s.x - cur_proj.x, s.y - cur_proj.y);
+		if (proj_angle > alpha) {
+			region_l = alpha;
+			target = region_r - PI/2;
+		} else {
+			region_r = alpha;
+			target = region_l + PI/2;
+		}
+	}
+
+	draw_line(renderer, cur_proj, {cur_proj.x + 100*sinf(region_r), cur_proj.y + 100*cosf(region_r)}, {0,0,255,100});
+	draw_line(renderer, cur_proj, {cur_proj.x + 100*sinf(region_l), cur_proj.y + 100*cosf(region_l)}, {0,0,255,100});
+	printf("alph:%lf l:%lf r:%lf (%lf, %lf) (%lf,%lf)\n", alpha, region_l, region_r, cur_proj.x, cur_proj.y, cur_proj.x + 100*sinf(region_r), cur_proj.y + 100*cosf(region_r));
+	fflush(stdout);
+	SDL_RenderPresent(renderer);
+	SDL_Delay(2000);
+
 	// angle from projection to curpoint is vect normal of st
 
 	// Only check edges above haflplane of st facing t.
-	// Check chain on current side of st first
+	// Check chain on current side of st first 
+	 
 	// Sweep edges from wlog. left to right relative to v from halfplane st
 
-	double halfplane_l = atan2(t.y - cur_project.y, t.x - cur_project.x);
-	double halfplane_r = atan2(t.y - s.y, t.x - s.x);
 	
-	if (halfplane_l > halfplane_r) {
-		double tmp = halfplane_l;
-		halfplane_l = halfplane_r;
-		halfplane_r = tmp; 
-	}
 
 	for (int i = 0; i < cur_point.num_neighbours; i++) {
 
 		canonical_triangle* neighbour_tri = cur_point.neighbours[i];
 		point* neighbour = neighbour_tri->p;
-		double neighbour_angle = atan2(neighbour->y - cur_project.y, neighbour->x - cur_project.x);
+		double neighbour_angle = atan2(neighbour->x - cur_proj.x, neighbour->y - cur_proj.y);
 		double neighbour_cur_angle = 0;
 		if (neighbour->x != cur_point.x)
-			neighbour_cur_angle = (neighbour->y - cur_point.y) / (neighbour->x - cur_point.x);
+			neighbour_cur_angle = atan2(neighbour->x - cur_point.x, neighbour->y - cur_point.y);
 
-		bool is_valid = (neighbour->x == t.x && neighbour->y == t.y) && neighbour_angle >= halfplane_l && neighbour_angle <= halfplane_r && neighbour_cur_angle < best_gradient;
+		double diff = abs(neighbour_cur_angle - target);
+		printf("%lf %lf n:%lf l:%lf r:%lf\n", diff, best_diff, neighbour_angle, region_l, region_r);
+		bool is_valid = (neighbour->x == t.x && neighbour->y == t.y) || (neighbour_angle >= region_l && neighbour_angle <= region_r && diff < best_diff);
 		if (!is_valid) continue;
 
-		best_gradient = neighbour_cur_angle;
+		best_diff = diff;
 		best = cur_point.neighbours[i];
-		// point is on the same side of st as cur_point
-		// point is above halfplane through st facing t 
 	}
 
 	return best;

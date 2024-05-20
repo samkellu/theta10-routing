@@ -17,7 +17,6 @@ void draw_point(SDL_Renderer* renderer, point pos, color c) {
 
 void draw_tri(SDL_Renderer* renderer, point p, canonical_triangle tri, color c) {
 
-	printf("%lf %lf \n", tri.al, tri.ar);
 	double a = tri.bisect_distance;
 	double o = a * tanf((tri.ar - tri.al) / 2);
 	double h = sqrt(pow(a, 2) + pow(o, 2));
