@@ -2,6 +2,23 @@
 #include "graphics.h"
 #include "algorithms.h"
 
+
+double dot(int v1x, int v1y, int v2x, int v2y) {
+	return v1x * v2x + v1y * v2y;
+}
+
+double cross(int v1x, int v1y, int v2x, int v2y) {
+	return v1x * v2y - v1y * v2x;
+}
+
+double get_angle(int v1x, int v1y, int v2x, int v2y)
+{
+	// |A·B| = |A| |B| COS(θ)
+	// |A×B| = |A| |B| SIN(θ)
+	return atan2(cross(v1x, v1y, v2x, v2y), dot(v1x, v1y, v2x, v2y));
+	// return acosf(dot(v1x, v1y, v2x, v2y));
+}
+
 point orth_project(point v, edge edge) {
 	double recip_m = -(edge.points[1].x - edge.points[0].x) / (edge.points[1].y - edge.points[0].y);
 	double m = (edge.points[1].y - edge.points[0].y) / (edge.points[1].x - edge.points[0].x);
@@ -85,62 +102,135 @@ bool is_visible(point observer, point pt, edge obstacles[], int n) {
 	return true;
 }
 
-canonical_triangle* bisect_alg(SDL_Renderer* renderer, point cur_point, point s, point t) {
+canonical_triangle* find(SDL_Renderer* renderer, point cur_point, point cur_proj, point s, point t, double sweep_target, double region_l, double region_r, side lr) {
 
-	edge e = {s, t};
 	canonical_triangle* best = NULL;
+	double sweep_limit = lr == RIGHT ? PI : -PI;
 
-	double alpha = atan2(t.x - s.x, t.y - s.y);
-	double best_diff = PI;
-	SDL_SetRenderDrawColor(renderer, 100, 100, 100, 100);
-	double region_l = alpha - PI/2;
-	double region_r = alpha + PI/2;
-	double target = alpha;
-	point cur_proj = orth_project(cur_point, e);
-
-	if (cur_point.x != s.x && cur_point.y != s.y) {
-		double proj_angle = atan2(s.x - cur_proj.x, s.y - cur_proj.y);
-		if (proj_angle > alpha) {
-			region_l = alpha;
-			target = region_r - PI/2;
-		} else {
-			region_r = alpha;
-			target = region_l + PI/2;
-		}
+	if (cur_point.obstacle_endpoint != NULL) {
+		double endpoint_angle = get_angle(cur_proj.x - cur_point.x, cur_proj.y - cur_point.y, cur_point.obstacle_endpoint->x - cur_point.x, cur_point.obstacle_endpoint->y - cur_point.y);
+		if ((lr == LEFT && endpoint_angle > sweep_limit && endpoint_angle < 0) || (lr == RIGHT && endpoint_angle < sweep_limit && endpoint_angle > 0))
+			sweep_limit = endpoint_angle;
 	}
-
-	draw_line(renderer, cur_proj, {cur_proj.x + 100*sinf(region_r), cur_proj.y + 100*cosf(region_r)}, {0,0,255,100});
-	draw_line(renderer, cur_proj, {cur_proj.x + 100*sinf(region_l), cur_proj.y + 100*cosf(region_l)}, {0,0,255,100});
-	printf("alph:%lf l:%lf r:%lf (%lf, %lf) (%lf,%lf)\n", alpha, region_l, region_r, cur_proj.x, cur_proj.y, cur_proj.x + 100*sinf(region_r), cur_proj.y + 100*cosf(region_r));
-	fflush(stdout);
-	SDL_RenderPresent(renderer);
-	SDL_Delay(2000);
-
-	// angle from projection to curpoint is vect normal of st
-
-	// Only check edges above haflplane of st facing t.
-	// Check chain on current side of st first 
-	 
-	// Sweep edges from wlog. left to right relative to v from halfplane st
-
 	
+	double best_neighbour_angle = sweep_limit;
+	double st_ang = atan2(t.y - s.y, t.x - s.x);
+	double cur_ang = atan2(cur_proj.y - cur_point.y, cur_proj.x - cur_point.x);
+	draw_line(renderer, cur_point, cur_proj, {0,0,255,100});
+	draw_line(renderer, cur_point, {cur_point.x + 100*cosf(sweep_limit + cur_ang), cur_point.y + 100*sinf(sweep_limit + cur_ang)}, {0,0,255,100});
+	draw_line(renderer, cur_proj, {cur_proj.x + 100*cosf(st_ang), cur_proj.y + 100*sinf(st_ang)}, {0,0,255,100});
+	// draw_line(renderer, cur_proj, {cur_proj.x + 100*cosf(region_l + st_ang), cur_proj.y + 100*sinf(region_l + st_ang)}, {255,255,255,100});
+	SDL_RenderPresent(renderer);
+	SDL_Delay(1500);
 
+	printf("num neighbours %d\n", cur_point.num_neighbours);
 	for (int i = 0; i < cur_point.num_neighbours; i++) {
 
 		canonical_triangle* neighbour_tri = cur_point.neighbours[i];
 		point* neighbour = neighbour_tri->p;
-		double neighbour_angle = atan2(neighbour->x - cur_proj.x, neighbour->y - cur_proj.y);
-		double neighbour_cur_angle = 0;
-		if (neighbour->x != cur_point.x)
-			neighbour_cur_angle = atan2(neighbour->x - cur_point.x, neighbour->y - cur_point.y);
 
-		double diff = abs(neighbour_cur_angle - target);
-		printf("%lf %lf n:%lf l:%lf r:%lf\n", diff, best_diff, neighbour_angle, region_l, region_r);
-		bool is_valid = (neighbour->x == t.x && neighbour->y == t.y) || (neighbour_angle >= region_l && neighbour_angle <= region_r && diff < best_diff);
-		if (!is_valid) continue;
+		if (neighbour->x == cur_point.x && neighbour->y == cur_point.y) continue; 
+		if (neighbour->x == t.x && neighbour->y == t.y)
+			return cur_point.neighbours[i];
 
-		best_diff = diff;
+		double neighbour_angle = get_angle(t.x - s.x, t.y - s.y, neighbour->x - cur_proj.x, neighbour->y - cur_proj.y);
+		double neighbour_cur_angle = get_angle(cur_proj.x - cur_point.x, cur_proj.y - cur_point.y, neighbour->x - cur_point.x, neighbour->y - cur_point.y);
+
+		if (neighbour_angle <= region_l || neighbour_angle >= region_r) continue;
+
+		if (lr == RIGHT) {
+			if (neighbour_cur_angle > sweep_limit || neighbour_cur_angle < 0 || neighbour_cur_angle > best_neighbour_angle) continue;
+		} else {
+			if (neighbour_cur_angle < sweep_limit || neighbour_cur_angle > 0 || neighbour_cur_angle < best_neighbour_angle) continue;
+		}
+		
+		printf("%s: lim %lf  val %lf best %lf)\n", lr == RIGHT ? "RIGHT" : "LEFT", sweep_limit, neighbour_cur_angle, best_neighbour_angle);
+
+		draw_line(renderer, cur_point, {cur_point.x + 100*cosf(neighbour_cur_angle + cur_ang), cur_point.y + 100*sinf(neighbour_cur_angle + cur_ang)}, {0,0,255,100});
+		SDL_RenderPresent(renderer);
+		SDL_Delay(500);
+
+		draw_line(renderer, cur_point, {cur_point.x + 100*cosf(neighbour_cur_angle + cur_ang), cur_point.y + 100*sinf(neighbour_cur_angle + cur_ang)}, {0,0,0,100});
+		SDL_RenderPresent(renderer);
+
+		best_neighbour_angle = neighbour_cur_angle;
 		best = cur_point.neighbours[i];
+	}
+
+	draw_line(renderer, cur_point, {cur_point.x + 100*cosf(best_neighbour_angle + cur_ang), cur_point.y + 100*sinf(best_neighbour_angle + cur_ang)}, {255,255,255,100});
+	SDL_RenderPresent(renderer);
+	SDL_Delay(2000);
+
+	draw_line(renderer, cur_point, {cur_point.x + 100*cosf(best_neighbour_angle + cur_ang), cur_point.y + 100*sinf(best_neighbour_angle + cur_ang)}, {0,0,0,100});
+	SDL_RenderPresent(renderer);
+
+
+	return best;
+}
+
+canonical_triangle* closest_to_st(point cur_point, edge st, bool use_side = false, double al = -PI, double ar = PI, point* cur_proj = NULL) {
+
+	double best_dist = pow(2, 31);
+	canonical_triangle* best_neighbour = NULL;
+	for (int i = 0; i < cur_point.num_neighbours; i++) {
+		canonical_triangle* neighbour = cur_point.neighbours[i];
+
+		if (use_side) {
+			point s = st.points[0];
+			point t = st.points[1];
+			double cur_angle = get_angle(t.x - cur_proj->x, t.y - cur_proj->y, neighbour->p->x - cur_proj->x, neighbour->p->y - cur_proj->y);
+			if (cur_angle < al || cur_angle > ar) continue;
+		}
+
+		double dist = get_distance_from_edge(*neighbour->p, st);
+		if (dist < best_dist) {
+			best_dist = dist;
+			best_neighbour = neighbour;
+		}
+	}
+
+	return best_neighbour;
+}
+
+canonical_triangle* bisect_alg(SDL_Renderer* renderer, point cur_point, point s, point t) {
+
+	edge e = {s, t};
+	if (cur_point.x == s.x && cur_point.y == s.y)
+		return closest_to_st(cur_point, e);
+
+	canonical_triangle* best = NULL;
+
+	SDL_SetRenderDrawColor(renderer, 100, 100, 100, 100);
+	// Goal angle relative to st
+	// double st = get_angle(t.x - s.x, t.x - s.x, t.y - s.y);
+	double region_l = -PI/2; 
+	double region_r = PI/2;
+	point cur_proj = orth_project(cur_point, e);
+	double target;
+	side lr;
+
+	double cur_angle = get_angle(t.x - s.x, t.y - s.y, cur_point.x - s.x, cur_point.y - s.y);
+	if (cur_angle > 0)
+	{
+		lr = RIGHT;
+		region_l = 0;
+		target = -region_r;
+	}
+	else
+	{
+		lr = LEFT;
+		region_r = 0;
+		target = -region_l;
+	}
+
+	best = find(renderer, cur_point, cur_proj, s, t, target, region_l, region_r, lr);
+
+	// Cross st if no path exists to point closest to st
+	if (best == NULL) {
+		if (lr == LEFT)
+			best = closest_to_st(cur_point, e, true, 0, -region_l, &cur_proj);
+		else
+			best = closest_to_st(cur_point, e, true, -region_r, 0, &cur_proj);
 	}
 
 	return best;

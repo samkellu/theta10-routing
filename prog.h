@@ -18,6 +18,7 @@ struct point {
 	double y;
     canonical_triangle** neighbours;
     int num_neighbours;
+	point* obstacle_endpoint;
 };
 
 struct canonical_triangle {

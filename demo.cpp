@@ -27,7 +27,7 @@ canonical_triangle* get_canonical_tri(point v, double al, double ar) {
 	point bisect_end = {
 		v.x + cosf(al + (ar - al) / 2) * CONE_LENGTH,
 		v.y + sinf(al + (ar - al) / 2) * CONE_LENGTH,
-		NULL, 0
+		NULL, 0, NULL
 	};
 
 	edge bisect = {v, bisect_end};
@@ -37,6 +37,7 @@ canonical_triangle* get_canonical_tri(point v, double al, double ar) {
 
 	for (int j = 0; j < num_points; j++) {
 		if (points[j].x == v.x && points[j].y == v.y) continue;
+		if (v.obstacle_endpoint && points[j].x == v.obstacle_endpoint->x && points[j].y == v.obstacle_endpoint->y) continue;
 
 		double alpha = atan2(points[j].y - v.y, points[j].x - v.x);
 		// Point is not in current cone
@@ -116,9 +117,10 @@ void generate_graph(SDL_Renderer* renderer) {
 		int num_neighbours = get_neighbours(renderer, points[i], &neighbours);
 		for (int j = 0; j < num_neighbours; j++) {
 
+			// Add j to i if not exists
 			bool valid = true;
 			for (int u = 0; u < points[i].num_neighbours; u++) {
-				if (points[i].neighbours[u]->p == neighbours[j]->p) {
+				if (points[i].neighbours[u]->p->x == neighbours[j]->p->x && points[i].neighbours[u]->p->y == neighbours[j]->p->y) {
 					valid = false;
 					break;
 				}
@@ -129,9 +131,10 @@ void generate_graph(SDL_Renderer* renderer) {
 				points[i].neighbours[points[i].num_neighbours - 1] = neighbours[j];
 			}
 
+			// Add i to j if not exists
 			valid = true;
 			for (int u = 0; u < neighbours[j]->p->num_neighbours; u++) {
-				if (&points[i] == neighbours[j]->p) {
+				if (points[i].x == neighbours[j]->p->x && points[i].y == neighbours[j]->p->y) {
 					valid = false;
 					break;
 				}
@@ -141,9 +144,20 @@ void generate_graph(SDL_Renderer* renderer) {
 				neighbours[j]->p->neighbours = (canonical_triangle**) realloc(neighbours[j]->p->neighbours, sizeof(canonical_triangle*) * ++neighbours[j]->p->num_neighbours);
 				canonical_triangle* new_tri = (canonical_triangle*) malloc(sizeof(canonical_triangle));
 				*new_tri = *neighbours[j];
+				new_tri->p = &points[i];
+				new_tri->al += PI;
+				new_tri->ar += PI;
 				neighbours[j]->p->neighbours[neighbours[j]->p->num_neighbours - 1] = new_tri;
 			}
 		}
+	}
+
+	for (int i = 0; i < num_points; i++) {
+		printf("POINT %d\n", i);
+		for (int j = 0; j < points[i].num_neighbours; j++) {
+			printf("(%lf, %lf)\n", points[i].neighbours[j]->p->x, points[i].neighbours[j]->p->y);
+		}
+		printf("\n\n");
 	}
 }
 
@@ -166,6 +180,7 @@ void route(SDL_Renderer* renderer) {
 		}
 
 		draw_line(renderer, cur_point, *(best->p), {255, 0, 0, 150});
+
 		draw_tri(renderer, cur_point, *best, {255, 0, 0, 150});
 
 		SDL_RenderPresent(renderer);
@@ -219,8 +234,8 @@ int main() {
 	for (int i = 0; i < NUM_OBSTACLES; i++) {
 		bool valid = true;
 		do {
-			point p1 = {(double) (rand() % 1000), (double) (rand() % 1000), NULL, 0};
-			point p2 = {(double) (rand() % 1000), (double) (rand() % 1000), NULL, 0};
+			point p1 = {(double) (rand() % 1000), (double) (rand() % 1000), NULL, 0, NULL};
+			point p2 = {(double) (rand() % 1000), (double) (rand() % 1000), NULL, 0, NULL};
 			obstacles[i] = {p1, p2};
 
 			for (int j = 0; j < i; j++) {
@@ -229,6 +244,8 @@ int main() {
 			}
 		} while (!valid);
 
+		obstacles[i].points[0].obstacle_endpoint = &obstacles[i].points[1];
+		obstacles[i].points[1].obstacle_endpoint = &obstacles[i].points[0];
 		points[cur_point++] = obstacles[i].points[0];
 		points[cur_point++] = obstacles[i].points[1];
 	}
@@ -240,13 +257,15 @@ int main() {
 			(double) (rand() % 1000),
 			(double) (rand() % 1000),
 			NULL,
-			0};
+			0,
+			NULL};
 
 		points[t] = {
 			(double) (rand() % 1000),
 			(double) (rand() % 1000),
 			NULL,
-			0};
+			0,
+			NULL};
 
 		st = {points[s], points[t]};
 
@@ -276,7 +295,7 @@ int main() {
 				case SDL_MOUSEBUTTONDOWN:
 					SDL_GetMouseState(&mx, &my);
 					dispose_graph();
-					points[cur_point] = {(double) mx, (double) my, NULL, 0};
+					points[cur_point] = {(double) mx, (double) my, NULL, 0, NULL};
 
 					cur_point = cur_point + 1 > p_end ? p_start : cur_point + 1;
 					num_points += num_points == p_end ? 0 : 1;
@@ -288,7 +307,7 @@ int main() {
 					switch (e.key.keysym.sym) {
 						case SDLK_s:
 							dispose_graph();
-							points[s] = {(double) mx, (double) my, NULL, 0};
+							points[s] = {(double) mx, (double) my, NULL, 0, NULL};
 
 							st.points[0] = points[s];
 							generate_graph(renderer);
@@ -296,7 +315,7 @@ int main() {
 
 						case SDLK_t:
 							dispose_graph();
-							points[t] = {(double) mx, (double) my, NULL, 0};
+							points[t] = {(double) mx, (double) my, NULL, 0, NULL};
 
 							st.points[1] = points[t];
 							generate_graph(renderer);
@@ -310,8 +329,11 @@ int main() {
 			}
 		}
 
-		point p = {(double) mx, (double) my, NULL, 0};
+		point p = {(double) mx, (double) my, NULL, 0, NULL};
 		p.num_neighbours = get_neighbours(renderer, p, &p.neighbours);
+
+		// double ang = get_angle(points[t].x - points[s].x, points[t].y - points[s].y, mx - points[s].x, my - points[s].y);
+		// printf("%lf\n", ang);
 		SDL_SetRenderDrawColor(renderer, 0, 0, 0, 50);
 		SDL_RenderClear(renderer);
 
