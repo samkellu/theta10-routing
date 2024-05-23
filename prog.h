@@ -13,6 +13,11 @@
 
 struct canonical_triangle;
 
+struct vec2 {
+	double x;
+	double y;
+};
+
 struct point {
     double x;
 	double y;

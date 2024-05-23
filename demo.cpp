@@ -269,7 +269,8 @@ int main() {
 
 		st = {points[s], points[t]};
 
-	} while (!is_visible(points[s], points[t], obstacles, NUM_OBSTACLES));
+	} while (!is_visible(points[s], points[t], obstacles, NUM_OBSTACLES)
+			 || sqrt(pow(points[s].x - points[t].x, 2) + pow(points[s].y - points[t].y, 2)) < 600);
 
 
 	generate_graph(renderer);
