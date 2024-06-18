@@ -80,12 +80,9 @@ int get_neighbours(SDL_Renderer* renderer, point v, canonical_triangle*** neighb
 		else continue;
 		
 		to_add = (canonical_triangle**) realloc(to_add, sizeof(canonical_triangle*) * ++num_neighbours);
-		canonical_triangle* ct = (canonical_triangle*) malloc(sizeof(canonical_triangle));
+		to_add[num_neighbours - 1] = (canonical_triangle*) malloc(sizeof(canonical_triangle));
 		double alpha = atan2(end->y - v.y, end->x - v.x);
-		*ct = {end, alpha, alpha, 0};
-
-		printf("%d\n", ct->p->num_neighbours);
-		to_add[num_neighbours - 1] = ct;
+		*to_add[num_neighbours - 1] = {end, alpha, alpha, 0};
 
 		subcone_bounds = (double*) realloc(subcone_bounds, sizeof(double) * ++num_subcones);
 		subcone_bounds[num_subcones - 1] = alpha;
