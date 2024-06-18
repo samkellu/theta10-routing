@@ -22,6 +22,8 @@ void dispose_graph() {
 	}
 }
 
+bool point_equals(point a, point b) { return a.x == b.x && a.y == b.y; } 
+
 canonical_triangle* get_canonical_tri(point v, double al, double ar) {
  
 	point bisect_end = {
@@ -36,8 +38,8 @@ canonical_triangle* get_canonical_tri(point v, double al, double ar) {
 	double min_bi_dist = pow(2, 31);
 
 	for (int j = 0; j < num_points; j++) {
-		if (points[j].x == v.x && points[j].y == v.y) continue;
-		if (v.obstacle_endpoint && points[j].x == v.obstacle_endpoint->x && points[j].y == v.obstacle_endpoint->y) continue;
+		if (point_equals(points[j], v)) continue;
+		if (v.obstacle_endpoint && point_equals(points[j], *v.obstacle_endpoint)) continue;
 
 		double alpha = atan2(points[j].y - v.y, points[j].x - v.x);
 		// Point is not in current cone
@@ -72,8 +74,8 @@ int get_neighbours(SDL_Renderer* renderer, point v, canonical_triangle*** neighb
 		point p1 = obstacles[i].points[1];
 
 		point end;
-		if (v.x == p0.x && v.y == p0.y) end = p1;
-		else if (v.x == p1.x && v.y == p1.y) end = p0;
+		if (point_equals(v, p0)) end = p1;
+		else if (point_equals(v, p1)) end = p0;
 		else continue;
 		
 		subcone_bounds = (double*) realloc(subcone_bounds, sizeof(double) * ++num_subcones);
@@ -171,7 +173,7 @@ void route(SDL_Renderer* renderer) {
 	int max_steps = 20;
 	while (max_steps-- >= 0) {
 
-		canonical_triangle* best = bisect_alg(renderer, cur_point, points[s], points[t]);
+		canonical_triangle* best = cone_alg(renderer, cur_point, points[s], points[t]);
 		// canonical_triangle* best = low_angle_alg(renderer, cur_point, points[s], points[t]);
 		
 		if (best == NULL) {
