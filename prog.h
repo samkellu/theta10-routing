@@ -13,11 +13,17 @@
 
 struct canonical_triangle;
 
+struct vec2 {
+	double x;
+	double y;
+};
+
 struct point {
     double x;
 	double y;
     canonical_triangle** neighbours;
     int num_neighbours;
+	point* obstacle_endpoint;
 };
 
 struct canonical_triangle {
