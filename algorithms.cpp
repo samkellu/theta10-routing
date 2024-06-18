@@ -235,18 +235,10 @@ canonical_triangle* bisect_alg(SDL_Renderer* renderer, point cur_point, point s,
 	return best;
 }
 
-vec2 find_t_cone(point cur_point, point t) {
+bool contains_t(canonical_triangle c, point t) {
 
-	double alpha = atan2(t.y - cur_point.y, t.x - cur_point.x);
-
-	for (int i = 0; i <= NUM_CONES; i++) {
-		printf("%lf <= %lf < %lf\n", cone_bounds[i], alpha, cone_bounds[(i+1) % NUM_CONES]);
-		if (alpha >= cone_bounds[i] && alpha < cone_bounds[(i+1) % NUM_CONES]) {
-			return {(double) cone_bounds[i], (double) cone_bounds[(i+1) % NUM_CONES]};
-		}
-	}
-
-	return {0, 0};
+	double alpha = atan2(t.y - c.p->y, t.x - c.p->x);
+	return alpha >= c.al && alpha < c.ar;
 }
 
 canonical_triangle* find_cone(SDL_Renderer* renderer, point cur_point, point cur_proj, point s, point t, double sweep_target, double region_l, double region_r, side lr) {
@@ -275,9 +267,8 @@ canonical_triangle* find_cone(SDL_Renderer* renderer, point cur_point, point cur
 	SDL_Delay(1500);
 #endif
 
-
-	vec2 t_cone_bounds = find_t_cone(cur_point, t);
 	for (int i = 0; i < cur_point.num_neighbours; i++) {
+
 		canonical_triangle* neighbour_tri = cur_point.neighbours[i];
 		point* neighbour = neighbour_tri->p;
 
@@ -290,13 +281,11 @@ canonical_triangle* find_cone(SDL_Renderer* renderer, point cur_point, point cur
 		vec2 cur_to_neighbour = {neighbour->x - cur_point.x, neighbour->y - cur_point.y};
 		double neighbour_angle = get_angle(s_to_t, proj_to_neighbour);
 		double neighbour_cur_angle = get_angle(cur_to_proj, cur_to_neighbour);
+		bool is_t_cone = contains_t(*neighbour_tri, t);
 
-		double alpha = atan2(neighbour->y - cur_point.y, neighbour->x - cur_point.x);
-		bool in_t_cone = alpha >= t_cone_bounds.x && alpha < t_cone_bounds.y;
+		printf("in t cone %s\n", is_t_cone ? "yes" : "no");
 
-		printf("%lf <= %lf < %lf in t cone %s\n", t_cone_bounds.x, alpha, t_cone_bounds.y, in_t_cone ? "yes" : "no");
-
-		if (!in_t_cone && (neighbour_angle <= region_l || neighbour_angle >= region_r)) continue;
+		if (!is_t_cone && (neighbour_angle <= region_l || neighbour_angle >= region_r)) continue;
 
 		if (lr == RIGHT) {
 			if (neighbour_cur_angle > sweep_limit || neighbour_cur_angle < 0 || neighbour_cur_angle > best_neighbour_angle) continue;
@@ -307,7 +296,7 @@ canonical_triangle* find_cone(SDL_Renderer* renderer, point cur_point, point cur
 		
 		printf("%s: lim %lf  val %lf best %lf)\n", lr == RIGHT ? "RIGHT" : "LEFT", sweep_limit, neighbour_cur_angle, best_neighbour_angle);
 		best_neighbour_angle = neighbour_cur_angle;
-		best = cur_point.neighbours[i];
+		best = neighbour_tri;
 	}
 
 #ifdef DRAW_BOUNDS

@@ -39,7 +39,6 @@ canonical_triangle* get_canonical_tri(point v, double al, double ar) {
 
 	for (int j = 0; j < num_points; j++) {
 		if (point_equals(points[j], v)) continue;
-		if (v.obstacle_endpoint && point_equals(points[j], *v.obstacle_endpoint)) continue;
 
 		double alpha = atan2(points[j].y - v.y, points[j].x - v.x);
 		// Point is not in current cone
@@ -68,23 +67,31 @@ int get_neighbours(SDL_Renderer* renderer, point v, canonical_triangle*** neighb
 
 	int num_subcones = 0;
 	double* subcone_bounds = NULL;
+	int num_neighbours = 0;
+	canonical_triangle** to_add = NULL;
 
 	for (int i = 0; i < NUM_OBSTACLES; i++) {
-		point p0 = obstacles[i].points[0];
-		point p1 = obstacles[i].points[1];
+		point* p0 = &obstacles[i].points[0];
+		point* p1 = &obstacles[i].points[1];
 
-		point end;
-		if (point_equals(v, p0)) end = p1;
-		else if (point_equals(v, p1)) end = p0;
+		point* end;
+		if (point_equals(v, *p0)) end = p1;
+		else if (point_equals(v, *p1)) end = p0;
 		else continue;
 		
+		to_add = (canonical_triangle**) realloc(to_add, sizeof(canonical_triangle*) * ++num_neighbours);
+		canonical_triangle* ct = (canonical_triangle*) malloc(sizeof(canonical_triangle));
+		double alpha = atan2(end->y - v.y, end->x - v.x);
+		*ct = {end, alpha, alpha, 0};
+
+		printf("%d\n", ct->p->num_neighbours);
+		to_add[num_neighbours - 1] = ct;
+
 		subcone_bounds = (double*) realloc(subcone_bounds, sizeof(double) * ++num_subcones);
-		subcone_bounds[num_subcones - 1] = atan2(end.y - v.y, end.x - v.x);
+		subcone_bounds[num_subcones - 1] = alpha;
 	}
 
-	int num_neighbours = 0;
 	int subcone_curs = 0;
-	canonical_triangle** to_add = NULL;
 	for (int i = 0; i < NUM_CONES; i++) {
 
 		// Find nearest visible point (bisect distance) in cone
@@ -115,6 +122,7 @@ void generate_graph(SDL_Renderer* renderer) {
 
 	for (int i = 0; i < num_points; i++) {
 
+		// 2x free??? TODO
 		canonical_triangle** neighbours = NULL;
 		int num_neighbours = get_neighbours(renderer, points[i], &neighbours);
 		for (int j = 0; j < num_neighbours; j++) {
@@ -122,7 +130,7 @@ void generate_graph(SDL_Renderer* renderer) {
 			// Add j to i if not exists
 			bool valid = true;
 			for (int u = 0; u < points[i].num_neighbours; u++) {
-				if (points[i].neighbours[u]->p->x == neighbours[j]->p->x && points[i].neighbours[u]->p->y == neighbours[j]->p->y) {
+				if (point_equals(*points[i].neighbours[u]->p, *neighbours[j]->p)) {
 					valid = false;
 					break;
 				}
@@ -136,14 +144,19 @@ void generate_graph(SDL_Renderer* renderer) {
 			// Add i to j if not exists
 			valid = true;
 			for (int u = 0; u < neighbours[j]->p->num_neighbours; u++) {
-				if (points[i].x == neighbours[j]->p->x && points[i].y == neighbours[j]->p->y) {
+				if (point_equals(points[i], *neighbours[j]->p)) {
 					valid = false;
 					break;
 				}
 			}
 
 			if (valid) {
+			printf("herherere\n");
+	printf("%d\n", neighbours[j]->p->num_neighbours);
+	fflush(stdout);
 				neighbours[j]->p->neighbours = (canonical_triangle**) realloc(neighbours[j]->p->neighbours, sizeof(canonical_triangle*) * ++neighbours[j]->p->num_neighbours);
+			printf("herherere???\n");
+	fflush(stdout);
 				canonical_triangle* new_tri = (canonical_triangle*) malloc(sizeof(canonical_triangle));
 				*new_tri = *neighbours[j];
 				new_tri->p = &points[i];
@@ -152,14 +165,6 @@ void generate_graph(SDL_Renderer* renderer) {
 				neighbours[j]->p->neighbours[neighbours[j]->p->num_neighbours - 1] = new_tri;
 			}
 		}
-	}
-
-	for (int i = 0; i < num_points; i++) {
-		printf("POINT %d\n", i);
-		for (int j = 0; j < points[i].num_neighbours; j++) {
-			printf("(%lf, %lf)\n", points[i].neighbours[j]->p->x, points[i].neighbours[j]->p->y);
-		}
-		printf("\n\n");
 	}
 }
 
@@ -255,26 +260,16 @@ int main() {
 	edge st;
 	do {
 
-		points[s] = {
-			(double) (rand() % 1000),
-			(double) (rand() % 1000),
-			NULL,
-			0,
-			NULL};
-
-		points[t] = {
-			(double) (rand() % 1000),
-			(double) (rand() % 1000),
-			NULL,
-			0,
-			NULL};
-
+		points[s] = {(double) (rand() % 1000), (double) (rand() % 1000), NULL, 0, NULL};
+		points[t] = {(double) (rand() % 1000), (double) (rand() % 1000), NULL, 0, NULL};
 		st = {points[s], points[t]};
 
 	} while (!is_visible(points[s], points[t], obstacles, NUM_OBSTACLES)
 			 || sqrt(pow(points[s].x - points[t].x, 2) + pow(points[s].y - points[t].y, 2)) < 600);
 
 
+		printf("here\n");
+		fflush(stdout);
 	generate_graph(renderer);
 
 	// mouse coords
