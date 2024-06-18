@@ -238,6 +238,7 @@ canonical_triangle* bisect_alg(SDL_Renderer* renderer, point cur_point, point s,
 bool contains_t(canonical_triangle c, point t) {
 
 	double alpha = atan2(t.y - c.p->y, t.x - c.p->x);
+	printf("%lf <= %lf < %lf\n", c.al, alpha, c.ar);
 	return alpha >= c.al && alpha < c.ar;
 }
 
