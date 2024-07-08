@@ -2,14 +2,12 @@
 #include "graphics.h"
 #include "algorithms.h"
 
-point points[NUM_POINTS + NUM_OBSTACLES * 2 + 2];
-edge obstacles[NUM_OBSTACLES];
+point* points = (point*) malloc(0);
+edge* obstacles = (edge*) malloc(0);
 const int s = 0;
 const int t = 1;
-const int p_start = 2 + NUM_OBSTACLES * 2;
-const int p_end = NUM_POINTS + p_start;
-int cur_point = 2;
-int num_points = p_start;
+int num_points = 2;
+int num_obstacles = 0;
 
 void dispose_graph() {
 	for (int i = 0; i < num_points; i++) {
@@ -70,7 +68,7 @@ int get_neighbours(SDL_Renderer* renderer, point v, canonical_triangle*** neighb
 	int num_neighbours = 0;
 	canonical_triangle** to_add = NULL;
 
-	for (int i = 0; i < NUM_OBSTACLES; i++) {
+	for (int i = 0; i < num_obstacles; i++) {
 		point* p0 = &obstacles[i].points[0];
 		point* p1 = &obstacles[i].points[1];
 
@@ -148,12 +146,7 @@ void generate_graph(SDL_Renderer* renderer) {
 			}
 
 			if (valid) {
-			printf("herherere\n");
-	printf("%d\n", neighbours[j]->p->num_neighbours);
-	fflush(stdout);
 				neighbours[j]->p->neighbours = (canonical_triangle**) realloc(neighbours[j]->p->neighbours, sizeof(canonical_triangle*) * ++neighbours[j]->p->num_neighbours);
-			printf("herherere???\n");
-	fflush(stdout);
 				canonical_triangle* new_tri = (canonical_triangle*) malloc(sizeof(canonical_triangle));
 				*new_tri = *neighbours[j];
 				new_tri->p = &points[i];
@@ -235,6 +228,7 @@ int main() {
 	SDL_Delay(1000);
 
 	srand(time(NULL));
+
 	for (int i = 0; i < NUM_OBSTACLES; i++) {
 		bool valid = true;
 		do {
@@ -250,9 +244,11 @@ int main() {
 
 		obstacles[i].points[0].obstacle_endpoint = &obstacles[i].points[1];
 		obstacles[i].points[1].obstacle_endpoint = &obstacles[i].points[0];
-		points[cur_point++] = obstacles[i].points[0];
-		points[cur_point++] = obstacles[i].points[1];
+		points = (point*) realloc(points, sizeof(point) * (num_points + 2));
+		points[num_points++] = obstacles[i].points[0];
+		points[num_points++] = obstacles[i].points[1];
 	}
+
 
 	edge st;
 	do {
@@ -264,14 +260,14 @@ int main() {
 	} while (!is_visible(points[s], points[t], obstacles, NUM_OBSTACLES)
 			 || sqrt(pow(points[s].x - points[t].x, 2) + pow(points[s].y - points[t].y, 2)) < 600);
 
-
-		printf("here\n");
-		fflush(stdout);
 	generate_graph(renderer);
+	printf("herer\n");
+	fflush(stdout);
 
 	// mouse coords
 	int mx, my;
 	bool running = true;
+	point* obstacle_prev = NULL;
 	while (running) {
 
 		SDL_Delay(10);
@@ -290,11 +286,24 @@ int main() {
 				case SDL_MOUSEBUTTONDOWN:
 					SDL_GetMouseState(&mx, &my);
 					dispose_graph();
-					points[cur_point] = {(double) mx, (double) my, NULL, 0, NULL};
 
-					cur_point = cur_point + 1 > p_end ? p_start : cur_point + 1;
-					num_points += num_points == p_end ? 0 : 1;
+					points = (point*) realloc(points, sizeof(point) * (num_points + 1));
+					points[num_points] = {(double) mx, (double) my, NULL, 0, NULL};
+					if  (e.button.button == SDL_BUTTON_RIGHT) {
+						
+						if (obstacle_prev != NULL) {
+							obstacle_prev->obstacle_endpoint = &points[num_points];
+							points[num_points].obstacle_endpoint = obstacle_prev;
+							obstacles = (edge*) realloc(obstacles, sizeof(edge) * (num_obstacles + 1));
+							obstacles[num_obstacles] = {*obstacle_prev, points[num_points]};
+							obstacle_prev = NULL;
 
+						} else {
+							obstacle_prev = &points[num_points];
+						}
+					}
+
+					num_points++;
 					generate_graph(renderer);
 					break;
 
@@ -327,12 +336,10 @@ int main() {
 		point p = {(double) mx, (double) my, NULL, 0, NULL};
 		p.num_neighbours = get_neighbours(renderer, p, &p.neighbours);
 
-		// double ang = get_angle(points[t].x - points[s].x, points[t].y - points[s].y, mx - points[s].x, my - points[s].y);
-		// printf("%lf\n", ang);
 		SDL_SetRenderDrawColor(renderer, 0, 0, 0, 50);
 		SDL_RenderClear(renderer);
 
-		draw(renderer, points, num_points, obstacles, NUM_OBSTACLES, points[s], points[t]);
+		draw(renderer, points, num_points, obstacles, num_obstacles, points[s], points[t]);
 		for (int j = 0; j < p.num_neighbours; j++) {
             draw_line(renderer, p, *p.neighbours[j]->p, {100, 100, 100, 100});
         }
@@ -341,6 +348,8 @@ int main() {
 		free(p.neighbours);
 	}
 
+	free(points);
+	free(obstacles);
     SDL_DestroyWindow(win);
     SDL_Quit();
     return 0;

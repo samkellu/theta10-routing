@@ -10,6 +10,7 @@
 #define NUM_POINTS 25
 #define NUM_OBSTACLES 8
 #define PI 3.14159
+#define RANDOM_START 1
 
 struct canonical_triangle;
 
