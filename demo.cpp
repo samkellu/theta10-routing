@@ -2,8 +2,8 @@
 #include "graphics.h"
 #include "algorithms.h"
 
-point* points = (point*) malloc(0);
-edge* obstacles = (edge*) malloc(0);
+point* points = NULL;
+edge* obstacles = NULL;
 const int s = 0;
 const int t = 1;
 int num_points = 2;
@@ -30,7 +30,7 @@ canonical_triangle* get_canonical_tri(point v, double al, double ar) {
 		NULL, 0, NULL
 	};
 
-	edge bisect = {v, bisect_end};
+	edge bisect = {&v, &bisect_end};
 	canonical_triangle* best = (canonical_triangle*) malloc(sizeof(canonical_triangle));
 	*best = {NULL, al, ar, 0};
 	double min_bi_dist = pow(2, 31);
@@ -69,9 +69,8 @@ int get_neighbours(SDL_Renderer* renderer, point v, canonical_triangle*** neighb
 	canonical_triangle** to_add = NULL;
 
 	for (int i = 0; i < num_obstacles; i++) {
-		point* p0 = &obstacles[i].points[0];
-		point* p1 = &obstacles[i].points[1];
-
+		point* p0 = obstacles[i].points[0];
+		point* p1 = obstacles[i].points[1];
 		point* end;
 		if (point_equals(v, *p0)) end = p1;
 		else if (point_equals(v, *p1)) end = p0;
@@ -229,12 +228,15 @@ int main() {
 
 	srand(time(NULL));
 
+	obstacles = (edge*) malloc(sizeof(edge) * NUM_OBSTACLES);
+	points = (point*) malloc(sizeof(point) * NUM_OBSTACLES * 2 + 2);
+
 	for (int i = 0; i < NUM_OBSTACLES; i++) {
 		bool valid = true;
 		do {
 			point p1 = {(double) (rand() % 1000), (double) (rand() % 1000), NULL, 0, NULL};
 			point p2 = {(double) (rand() % 1000), (double) (rand() % 1000), NULL, 0, NULL};
-			obstacles[i] = {p1, p2};
+			obstacles[i] = {&p1, &p2};
 
 			for (int j = 0; j < i; j++) {
 				valid = get_intersect(obstacles[i],  obstacles[j]).x == -1;
@@ -242,27 +244,24 @@ int main() {
 			}
 		} while (!valid);
 
-		obstacles[i].points[0].obstacle_endpoint = &obstacles[i].points[1];
-		obstacles[i].points[1].obstacle_endpoint = &obstacles[i].points[0];
-		points = (point*) realloc(points, sizeof(point) * (num_points + 2));
-		points[num_points++] = obstacles[i].points[0];
-		points[num_points++] = obstacles[i].points[1];
+		obstacles[i].points[0]->obstacle_endpoint = obstacles[i].points[1];
+		obstacles[i].points[1]->obstacle_endpoint = obstacles[i].points[0];
+		points[num_points++] = *obstacles[i].points[0];
+		points[num_points++] = *obstacles[i].points[1];
 	}
 
-
+	num_obstacles = NUM_OBSTACLES;	
 	edge st;
 	do {
 
 		points[s] = {(double) (rand() % 1000), (double) (rand() % 1000), NULL, 0, NULL};
 		points[t] = {(double) (rand() % 1000), (double) (rand() % 1000), NULL, 0, NULL};
-		st = {points[s], points[t]};
+		st = {&points[s], &points[t]};
 
 	} while (!is_visible(points[s], points[t], obstacles, NUM_OBSTACLES)
 			 || sqrt(pow(points[s].x - points[t].x, 2) + pow(points[s].y - points[t].y, 2)) < 600);
 
 	generate_graph(renderer);
-	printf("herer\n");
-	fflush(stdout);
 
 	// mouse coords
 	int mx, my;
@@ -287,6 +286,8 @@ int main() {
 					SDL_GetMouseState(&mx, &my);
 					dispose_graph();
 
+					printf("here %d\n",  sizeof(point) * (num_points + 1));
+	fflush(stdout);
 					points = (point*) realloc(points, sizeof(point) * (num_points + 1));
 					points[num_points] = {(double) mx, (double) my, NULL, 0, NULL};
 					if  (e.button.button == SDL_BUTTON_RIGHT) {
@@ -295,7 +296,9 @@ int main() {
 							obstacle_prev->obstacle_endpoint = &points[num_points];
 							points[num_points].obstacle_endpoint = obstacle_prev;
 							obstacles = (edge*) realloc(obstacles, sizeof(edge) * (num_obstacles + 1));
-							obstacles[num_obstacles] = {*obstacle_prev, points[num_points]};
+							printf("herer %d\n",  num_obstacles);
+	fflush(stdout);
+							obstacles[num_obstacles++] = {obstacle_prev, &points[num_points]};
 							obstacle_prev = NULL;
 
 						} else {
@@ -313,7 +316,7 @@ int main() {
 							dispose_graph();
 							points[s] = {(double) mx, (double) my, NULL, 0, NULL};
 
-							st.points[0] = points[s];
+							st.points[0] = &points[s];
 							generate_graph(renderer);
 							break;
 
@@ -321,7 +324,7 @@ int main() {
 							dispose_graph();
 							points[t] = {(double) mx, (double) my, NULL, 0, NULL};
 
-							st.points[1] = points[t];
+							st.points[1] = &points[t];
 							generate_graph(renderer);
 							break;
 

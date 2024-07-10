@@ -53,9 +53,9 @@ void draw(SDL_Renderer* renderer, point* points, int num_points, edge* obstacles
 	draw_point(renderer, t, {0, 0, 255, 255});
 
 	SDL_SetRenderDrawColor(renderer, 0, 255, 0, 50);
-	for (int i = 0; i < NUM_OBSTACLES; i++) {
-		point p0 = obstacles[i].points[0];
-		point p1 = obstacles[i].points[1];
+	for (int i = 0; i < num_obstacles; i++) {
+		point p0 = *obstacles[i].points[0];
+		point p1 = *obstacles[i].points[1];
 		SDL_RenderDrawLine(renderer, p0.x, p0.y, p1.x, p1.y);
 	}
 
