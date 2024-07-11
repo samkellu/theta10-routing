@@ -233,21 +233,24 @@ int main() {
 
 	for (int i = 0; i < NUM_OBSTACLES; i++) {
 		bool valid = true;
+		edge e;
 		do {
 			point p1 = {(double) (rand() % 1000), (double) (rand() % 1000), NULL, 0, NULL};
 			point p2 = {(double) (rand() % 1000), (double) (rand() % 1000), NULL, 0, NULL};
-			obstacles[i] = {&p1, &p2};
+			e = {&p1, &p2};
 
 			for (int j = 0; j < i; j++) {
-				valid = get_intersect(obstacles[i],  obstacles[j]).x == -1;
+				valid = get_intersect(e,  obstacles[j]).x == -1;
 				if (!valid) break;
 			}
 		} while (!valid);
 
+		points[num_points++] = *e.points[0];
+		points[num_points++] = *e.points[1];
+		obstacles[i].points[0] = &points[num_points - 2];
+		obstacles[i].points[1] = &points[num_points - 1];
 		obstacles[i].points[0]->obstacle_endpoint = obstacles[i].points[1];
 		obstacles[i].points[1]->obstacle_endpoint = obstacles[i].points[0];
-		points[num_points++] = *obstacles[i].points[0];
-		points[num_points++] = *obstacles[i].points[1];
 	}
 
 	num_obstacles = NUM_OBSTACLES;	
@@ -261,7 +264,7 @@ int main() {
 	} while (!is_visible(points[s], points[t], obstacles, NUM_OBSTACLES)
 			 || sqrt(pow(points[s].x - points[t].x, 2) + pow(points[s].y - points[t].y, 2)) < 600);
 
-	generate_graph(renderer);
+	// generate_graph(renderer);
 
 	// mouse coords
 	int mx, my;
@@ -286,7 +289,7 @@ int main() {
 					SDL_GetMouseState(&mx, &my);
 					dispose_graph();
 
-					printf("here %d\n",  sizeof(point) * (num_points + 1));
+					printf("here %d\n",  (num_points + 1));
 	fflush(stdout);
 					points = (point*) realloc(points, sizeof(point) * (num_points + 1));
 					points[num_points] = {(double) mx, (double) my, NULL, 0, NULL};
