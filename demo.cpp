@@ -234,9 +234,10 @@ int main() {
 	for (int i = 0; i < NUM_OBSTACLES; i++) {
 		bool valid = true;
 		edge e;
+		point p1, p2;
 		do {
-			point p1 = {(double) (rand() % 1000), (double) (rand() % 1000), NULL, 0, NULL};
-			point p2 = {(double) (rand() % 1000), (double) (rand() % 1000), NULL, 0, NULL};
+			p1 = {(double) (rand() % 1000), (double) (rand() % 1000), NULL, 0, NULL};
+			p2 = {(double) (rand() % 1000), (double) (rand() % 1000), NULL, 0, NULL};
 			e = {&p1, &p2};
 
 			for (int j = 0; j < i; j++) {
@@ -245,12 +246,13 @@ int main() {
 			}
 		} while (!valid);
 
-		points[num_points++] = *e.points[0];
-		points[num_points++] = *e.points[1];
+		points[num_points++] = p1;
+		points[num_points++] = p2;
 		obstacles[i].points[0] = &points[num_points - 2];
 		obstacles[i].points[1] = &points[num_points - 1];
-		obstacles[i].points[0]->obstacle_endpoint = obstacles[i].points[1];
-		obstacles[i].points[1]->obstacle_endpoint = obstacles[i].points[0];
+		points[num_points - 2].obstacle_endpoint = &points[num_points - 1];
+		points[num_points - 1].obstacle_endpoint = &points[num_points - 2];
+		printf("%lf %lf\n%lf %lf\n", obstacles[i].points[0]->x, obstacles[i].points[0]->y, obstacles[i].points[1]->x, obstacles[i].points[1]->y);
 	}
 
 	num_obstacles = NUM_OBSTACLES;	
@@ -261,10 +263,10 @@ int main() {
 		points[t] = {(double) (rand() % 1000), (double) (rand() % 1000), NULL, 0, NULL};
 		st = {&points[s], &points[t]};
 
-	} while (!is_visible(points[s], points[t], obstacles, NUM_OBSTACLES)
+	} while (!is_visible(points[s], points[t], obstacles, num_obstacles)
 			 || sqrt(pow(points[s].x - points[t].x, 2) + pow(points[s].y - points[t].y, 2)) < 600);
 
-	// generate_graph(renderer);
+	generate_graph(renderer);
 
 	// mouse coords
 	int mx, my;
@@ -289,9 +291,12 @@ int main() {
 					SDL_GetMouseState(&mx, &my);
 					dispose_graph();
 
-					printf("here %d\n",  (num_points + 1));
-	fflush(stdout);
+					for (int i = 0; i < num_points; i++) {
+						printf("%lf %lf\n", points[i].x, points[i].y);
+					}
 					points = (point*) realloc(points, sizeof(point) * (num_points + 1));
+					printf("herer %d\n",  num_obstacles);
+					fflush(stdout);
 					points[num_points] = {(double) mx, (double) my, NULL, 0, NULL};
 					if  (e.button.button == SDL_BUTTON_RIGHT) {
 						
@@ -299,8 +304,6 @@ int main() {
 							obstacle_prev->obstacle_endpoint = &points[num_points];
 							points[num_points].obstacle_endpoint = obstacle_prev;
 							obstacles = (edge*) realloc(obstacles, sizeof(edge) * (num_obstacles + 1));
-							printf("herer %d\n",  num_obstacles);
-	fflush(stdout);
 							obstacles[num_obstacles++] = {obstacle_prev, &points[num_points]};
 							obstacle_prev = NULL;
 
