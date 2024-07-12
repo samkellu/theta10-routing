@@ -45,7 +45,7 @@ canonical_triangle* get_canonical_tri(point v, double al, double ar) {
 		double bisect_distance = get_orth_distance(points[j], bisect);
 		if (bisect_distance >= min_bi_dist) continue;
 		// Checks if the vector to the point intersects any walls
-		if (!is_visible(v, points[j], obstacles, NUM_OBSTACLES)) continue;
+		if (!is_visible(v, points[j], obstacles, num_obstacles)) continue;
 
 		best->p = &points[j];
 		best->bisect_distance = bisect_distance;
@@ -161,7 +161,7 @@ void route(SDL_Renderer* renderer) {
 
 	SDL_SetRenderDrawColor(renderer, 0, 0, 0, 50);
 	SDL_RenderClear(renderer);
-	draw(renderer, points, num_points, obstacles, NUM_OBSTACLES, points[s], points[t]);
+	draw(renderer, points, num_points, obstacles, num_obstacles, points[s], points[t]);
 
 	point cur_point = points[s];
 	int max_steps = 20;
@@ -229,7 +229,7 @@ int main() {
 	srand(time(NULL));
 
 	obstacles = (edge*) malloc(sizeof(edge) * NUM_OBSTACLES);
-	points = (point*) malloc(sizeof(point) * NUM_OBSTACLES * 2 + 2);
+	points = (point*) malloc(sizeof(point) * (NUM_OBSTACLES * 2 + 2));
 
 	for (int i = 0; i < NUM_OBSTACLES; i++) {
 		bool valid = true;
@@ -252,7 +252,6 @@ int main() {
 		obstacles[i].points[1] = &points[num_points - 1];
 		points[num_points - 2].obstacle_endpoint = &points[num_points - 1];
 		points[num_points - 1].obstacle_endpoint = &points[num_points - 2];
-		printf("%lf %lf\n%lf %lf\n", obstacles[i].points[0]->x, obstacles[i].points[0]->y, obstacles[i].points[1]->x, obstacles[i].points[1]->y);
 	}
 
 	num_obstacles = NUM_OBSTACLES;	
@@ -294,15 +293,14 @@ int main() {
 					for (int i = 0; i < num_points; i++) {
 						printf("%lf %lf\n", points[i].x, points[i].y);
 					}
+
 					points = (point*) realloc(points, sizeof(point) * (num_points + 1));
-					printf("herer %d\n",  num_obstacles);
-					fflush(stdout);
 					points[num_points] = {(double) mx, (double) my, NULL, 0, NULL};
 					if  (e.button.button == SDL_BUTTON_RIGHT) {
-						
 						if (obstacle_prev != NULL) {
 							obstacle_prev->obstacle_endpoint = &points[num_points];
 							points[num_points].obstacle_endpoint = obstacle_prev;
+							obstacle_prev->obstacle_endpoint = &points[num_points];
 							obstacles = (edge*) realloc(obstacles, sizeof(edge) * (num_obstacles + 1));
 							obstacles[num_obstacles++] = {obstacle_prev, &points[num_points]};
 							obstacle_prev = NULL;
