@@ -116,7 +116,6 @@ void generate_graph(SDL_Renderer* renderer) {
 
 	for (int i = 0; i < num_points; i++) {
 
-		// 2x free??? TODO
 		canonical_triangle** neighbours = NULL;
 		int num_neighbours = get_neighbours(renderer, points[i], &neighbours);
 		for (int j = 0; j < num_neighbours; j++) {
@@ -254,7 +253,9 @@ int main() {
 		points[num_points - 1].obstacle_endpoint = &points[num_points - 2];
 	}
 
-	num_obstacles = NUM_OBSTACLES;	
+	num_obstacles = NUM_OBSTACLES;
+
+	printf("%d %d\n", num_points, NUM_OBSTACLES * 2 + 2);	
 	edge st;
 	do {
 
@@ -270,7 +271,7 @@ int main() {
 	// mouse coords
 	int mx, my;
 	bool running = true;
-	point* obstacle_prev = NULL;
+	int obstacle_prev_idx = -1;
 	while (running) {
 
 		SDL_Delay(10);
@@ -290,27 +291,24 @@ int main() {
 					SDL_GetMouseState(&mx, &my);
 					dispose_graph();
 
-					for (int i = 0; i < num_points; i++) {
-						printf("%lf %lf\n", points[i].x, points[i].y);
-					}
-
 					points = (point*) realloc(points, sizeof(point) * (num_points + 1));
 					points[num_points] = {(double) mx, (double) my, NULL, 0, NULL};
 					if  (e.button.button == SDL_BUTTON_RIGHT) {
-						if (obstacle_prev != NULL) {
-							obstacle_prev->obstacle_endpoint = &points[num_points];
-							points[num_points].obstacle_endpoint = obstacle_prev;
-							obstacle_prev->obstacle_endpoint = &points[num_points];
+						if (obstacle_prev_idx != -1) {
+							points[obstacle_prev_idx].obstacle_endpoint = &points[num_points];
+							points[num_points].obstacle_endpoint = &points[obstacle_prev_idx];
 							obstacles = (edge*) realloc(obstacles, sizeof(edge) * (num_obstacles + 1));
-							obstacles[num_obstacles++] = {obstacle_prev, &points[num_points]};
-							obstacle_prev = NULL;
+							obstacles[num_obstacles++] = {&points[obstacle_prev_idx], &points[num_points]};
+							printf("(%lf %lf), (%lf %lf)\n", obstacles[num_obstacles - 1].points[0]->x, obstacles[num_obstacles - 1].points[0]->y,  obstacles[num_obstacles - 1].points[1]->x,obstacles[num_obstacles - 1].points[1]->y);
+							obstacle_prev_idx = -1;
 
 						} else {
-							obstacle_prev = &points[num_points];
+							obstacle_prev_idx = num_points;
 						}
 					}
 
 					num_points++;
+					printf("%d %d\n", num_points, num_obstacles);
 					generate_graph(renderer);
 					break;
 
@@ -319,7 +317,6 @@ int main() {
 						case SDLK_s:
 							dispose_graph();
 							points[s] = {(double) mx, (double) my, NULL, 0, NULL};
-
 							st.points[0] = &points[s];
 							generate_graph(renderer);
 							break;
@@ -327,7 +324,6 @@ int main() {
 						case SDLK_t:
 							dispose_graph();
 							points[t] = {(double) mx, (double) my, NULL, 0, NULL};
-
 							st.points[1] = &points[t];
 							generate_graph(renderer);
 							break;
