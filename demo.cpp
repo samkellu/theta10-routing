@@ -254,8 +254,6 @@ int main() {
 	}
 
 	num_obstacles = NUM_OBSTACLES;
-
-	printf("%d %d\n", num_points, NUM_OBSTACLES * 2 + 2);	
 	edge st;
 	do {
 
@@ -291,6 +289,7 @@ int main() {
 					SDL_GetMouseState(&mx, &my);
 					dispose_graph();
 
+					printf("%d %d\n", num_points, num_obstacles);
 					points = (point*) realloc(points, sizeof(point) * (num_points + 1));
 					points[num_points] = {(double) mx, (double) my, NULL, 0, NULL};
 					if  (e.button.button == SDL_BUTTON_RIGHT) {
@@ -308,7 +307,6 @@ int main() {
 					}
 
 					num_points++;
-					printf("%d %d\n", num_points, num_obstacles);
 					generate_graph(renderer);
 					break;
 
@@ -336,19 +334,19 @@ int main() {
 			}
 		}
 
-		point p = {(double) mx, (double) my, NULL, 0, NULL};
-		p.num_neighbours = get_neighbours(renderer, p, &p.neighbours);
+		// point p = {(double) mx, (double) my, NULL, 0, NULL};
+		// p.num_neighbours = get_neighbours(renderer, p, &p.neighbours);
 
 		SDL_SetRenderDrawColor(renderer, 0, 0, 0, 50);
 		SDL_RenderClear(renderer);
 
 		draw(renderer, points, num_points, obstacles, num_obstacles, points[s], points[t]);
-		for (int j = 0; j < p.num_neighbours; j++) {
-            draw_line(renderer, p, *p.neighbours[j]->p, {100, 100, 100, 100});
-        }
+		// for (int j = 0; j < p.num_neighbours; j++) {
+            // draw_line(renderer, p, *p.neighbours[j]->p, {100, 100, 100, 100});
+        // }
 		SDL_RenderPresent(renderer);
 
-		free(p.neighbours);
+		// free(p.neighbours);
 	}
 
 	free(points);
