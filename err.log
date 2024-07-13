@@ -1,0 +1,1782 @@
+==38153== Memcheck, a memory error detector
+==38153== Copyright (C) 2002-2024, and GNU GPL'd, by Julian Seward et al.
+==38153== Using Valgrind-3.23.0-c54d316124-20240426 and LibVEX; rerun with -h for copyright info
+==38153== Command: ./demo
+==38153== 
+--38153-- Valgrind options:
+--38153--    --leak-check=full
+--38153--    -v
+--38153-- Contents of /proc/version:
+--38153--   Linux version 6.8.8-arch1-1 (linux@archlinux) (gcc (GCC) 13.2.1 20240417, GNU ld (GNU Binutils) 2.42.0) #1 SMP PREEMPT_DYNAMIC Sun, 28 Apr 2024 15:59:47 +0000
+--38153-- 
+--38153-- Arch and hwcaps: AMD64, LittleEndian, amd64-cx16-lzcnt-rdtscp-sse3-ssse3-avx-avx2-bmi-f16c-rdrand-rdseed-fma
+--38153-- Page sizes: currently 4096, max supported 4096
+--38153-- Valgrind library directory: /usr/lib/valgrind
+--38153-- Reading syms from /home/sam/theta10-routing/demo
+--38153-- Reading syms from /usr/lib/ld-linux-x86-64.so.2
+==38153== Downloading debug info for /usr/lib/ld-linux-x86-64.so.2...
+--38153--   Considering /home/sam/.cache/debuginfod_client/c560bca2bb17f5f25c6dafd8fc19cf1883f88558/debuginfo ..
+--38153--   .. CRC is valid
+==38153== Successfully downloaded debug file for /usr/lib/ld-linux-x86-64.so.2
+--38153-- Reading syms from /usr/lib/valgrind/memcheck-amd64-linux
+--38153--    object doesn't have a dynamic symbol table
+--38153-- Scheduler: using generic scheduler lock implementation.
+--38153-- Reading suppressions file: /usr/lib/valgrind/default.supp
+==38153== embedded gdbserver: reading from /tmp/vgdb-pipe-from-vgdb-to-38153-by-sam-on-???
+==38153== embedded gdbserver: writing to   /tmp/vgdb-pipe-to-vgdb-from-38153-by-sam-on-???
+==38153== embedded gdbserver: shared mem   /tmp/vgdb-pipe-shared-mem-vgdb-38153-by-sam-on-???
+==38153== 
+==38153== TO CONTROL THIS PROCESS USING vgdb (which you probably
+==38153== don't want to do, unless you know exactly what you're doing,
+==38153== or are doing some strange experiment):
+==38153==   /usr/lib/valgrind/../../bin/vgdb --pid=38153 ...command...
+==38153== 
+==38153== TO DEBUG THIS PROCESS USING GDB: start GDB like this
+==38153==   /path/to/gdb ./demo
+==38153== and then give GDB the following command
+==38153==   target remote | /usr/lib/valgrind/../../bin/vgdb --pid=38153
+==38153== --pid is optional if only one valgrind process is running
+==38153== 
+==38153== Downloading debug info for /usr/lib/valgrind/memcheck-amd64-linux...
+--38153--   Considering /home/sam/.cache/debuginfod_client/f13332d13ef25a4ce3c3f2b83fb8b96f4d26b0d3/debuginfo ..
+--38153--   .. CRC is valid
+==38153== Successfully downloaded debug file for /usr/lib/valgrind/memcheck-amd64-linux
+--38153-- Warning: cross-CU LIMITATION: some inlined fn names
+--38153-- might be shown as UnknownInlinedFun
+--38153-- REDIR: 0x40258c0 (ld-linux-x86-64.so.2:strlen) redirected to 0x58218624 (vgPlain_amd64_linux_REDIR_FOR_strlen)
+--38153-- REDIR: 0x40242a0 (ld-linux-x86-64.so.2:strcmp) redirected to 0x5821863e (vgPlain_amd64_linux_REDIR_FOR_strcmp)
+--38153-- REDIR: 0x4024070 (ld-linux-x86-64.so.2:index) redirected to 0x58218659 (vgPlain_amd64_linux_REDIR_FOR_index)
+--38153-- Reading syms from /usr/lib/valgrind/vgpreload_core-amd64-linux.so
+--38153-- Reading syms from /usr/lib/valgrind/vgpreload_memcheck-amd64-linux.so
+==38153== WARNING: new redirection conflicts with existing -- ignoring it
+--38153--     old: 0x040242a0 (strcmp              ) R-> (0000.0) 0x5821863e vgPlain_amd64_linux_REDIR_FOR_strcmp
+==38153== Downloading debug info for /usr/lib/valgrind/vgpreload_memcheck-amd64-linux.so...
+--38153--   Considering /home/sam/.cache/debuginfod_client/cbed7ab1bd31d06320a6ab8ddfd90a9645ad304a/debuginfo ..
+--38153--   .. CRC is valid
+==38153== Successfully downloaded debug file for /usr/lib/valgrind/vgpreload_memcheck-amd64-linux.so
+--38153--     new: 0x040242a0 (strcmp              ) R-> (2016.0) 0x0484cd00 strcmp
+==38153== WARNING: new redirection conflicts with existing -- ignoring it
+--38153--     old: 0x040258c0 (strlen              ) R-> (0000.0) 0x58218624 vgPlain_amd64_linux_REDIR_FOR_strlen
+--38153--     new: 0x040258c0 (strlen              ) R-> (2007.0) 0x0484bac0 strlen
+--38153-- REDIR: 0x40236d0 (ld-linux-x86-64.so.2:mempcpy) redirected to 0x4850db0 (mempcpy)
+--38153-- Reading syms from /usr/lib/libSDL2-2.0.so.0.3000.5
+--38153-- Reading syms from /usr/lib/libstdc++.so.6.0.33
+--38153-- Reading syms from /usr/lib/libm.so.6
+--38153-- Reading syms from /usr/lib/libgcc_s.so.1
+--38153-- Reading syms from /usr/lib/libc.so.6
+==38153== Downloading debug info for /usr/lib/libc.so.6...
+--38153--   Considering /home/sam/.cache/debuginfod_client/32a656aa5562eece8c59a585f5eacd6cf5e2307b/debuginfo ..
+--38153--   .. CRC is valid
+==38153== Successfully downloaded debug file for /usr/lib/libc.so.6
+--38153-- REDIR: 0x4025a60 (ld-linux-x86-64.so.2:strncmp) redirected to 0x484c500 (strncmp)
+==38153== Downloading debug info for /usr/lib/valgrind/vgpreload_core-amd64-linux.so...
+--38153--   Considering /home/sam/.cache/debuginfod_client/5ff105f54afe0f3d64d2ce83573fc4e997b98cea/debuginfo ..
+--38153--   .. CRC is valid
+==38153== Successfully downloaded debug file for /usr/lib/valgrind/vgpreload_core-amd64-linux.so
+--38153-- REDIR: 0x4e98b20 (libc.so.6:strncasecmp) redirected to 0x48371a0 (_vgnU_ifunc_wrapper)
+--38153-- REDIR: 0x4e95e80 (libc.so.6:mempcpy) redirected to 0x48371a0 (_vgnU_ifunc_wrapper)
+--38153-- REDIR: 0x4eac3c0 (libc.so.6:wcpncpy) redirected to 0x48371a0 (_vgnU_ifunc_wrapper)
+--38153-- REDIR: 0x4e961e0 (libc.so.6:stpcpy) redirected to 0x48371a0 (_vgnU_ifunc_wrapper)
+--38153-- REDIR: 0x4f10b20 (libc.so.6:__memmove_chk) redirected to 0x48371a0 (_vgnU_ifunc_wrapper)
+--38153-- REDIR: 0x4eba480 (libc.so.6:wmemcmp) redirected to 0x48371a0 (_vgnU_ifunc_wrapper)
+--38153-- REDIR: 0x4e96dd0 (libc.so.6:strcat) redirected to 0x48371a0 (_vgnU_ifunc_wrapper)
+--38153-- REDIR: 0x4e955b0 (libc.so.6:memcpy@@GLIBC_2.14) redirected to 0x48371a0 (_vgnU_ifunc_wrapper)
+--38153-- REDIR: 0x4eae1c0 (libc.so.6:wcsncpy) redirected to 0x48371a0 (_vgnU_ifunc_wrapper)
+--38153-- REDIR: 0x4f10a00 (libc.so.6:__memcpy_chk) redirected to 0x48371a0 (_vgnU_ifunc_wrapper)
+==38153== WARNING: new redirection conflicts with existing -- ignoring it
+--38153--     old: 0x04f55450 (__memcpy_chk_avx_una) R-> (2024.0) 0x04850830 __memmove_chk
+--38153--     new: 0x04f55450 (__memcpy_chk_avx_una) R-> (2030.0) 0x04850eb0 __memcpy_chk
+--38153-- REDIR: 0x4ead920 (libc.so.6:wcslen) redirected to 0x48371a0 (_vgnU_ifunc_wrapper)
+--38153-- REDIR: 0x4e96030 (libc.so.6:memset) redirected to 0x48371a0 (_vgnU_ifunc_wrapper)
+--38153-- REDIR: 0x4eae220 (libc.so.6:wcsnlen) redirected to 0x48371a0 (_vgnU_ifunc_wrapper)
+--38153-- REDIR: 0x4e98e20 (libc.so.6:strnlen) redirected to 0x48371a0 (_vgnU_ifunc_wrapper)
+--38153-- REDIR: 0x4e98eb0 (libc.so.6:strpbrk) redirected to 0x48371a0 (_vgnU_ifunc_wrapper)
+--38153-- REDIR: 0x4e96f50 (libc.so.6:strcmp) redirected to 0x48371a0 (_vgnU_ifunc_wrapper)
+--38153-- REDIR: 0x4e95fa0 (libc.so.6:memrchr) redirected to 0x48371a0 (_vgnU_ifunc_wrapper)
+--38153-- REDIR: 0x4eac7b0 (libc.so.6:wcschr) redirected to 0x48371a0 (_vgnU_ifunc_wrapper)
+--38153-- REDIR: 0x4e96e40 (libc.so.6:index) redirected to 0x48371a0 (_vgnU_ifunc_wrapper)
+--38153-- REDIR: 0x4e98ee0 (libc.so.6:rindex) redirected to 0x48371a0 (_vgnU_ifunc_wrapper)
+--38153-- REDIR: 0x4eac860 (libc.so.6:wcscmp) redirected to 0x48371a0 (_vgnU_ifunc_wrapper)
+--38153-- REDIR: 0x4e96250 (libc.so.6:stpncpy) redirected to 0x48371a0 (_vgnU_ifunc_wrapper)
+--38153-- REDIR: 0x4eba400 (libc.so.6:wmemchr) redirected to 0x48371a0 (_vgnU_ifunc_wrapper)
+--38153-- REDIR: 0x4e98cc0 (libc.so.6:strncmp) redirected to 0x48371a0 (_vgnU_ifunc_wrapper)
+--38153-- REDIR: 0x4e962b0 (libc.so.6:strcasecmp) redirected to 0x48371a0 (_vgnU_ifunc_wrapper)
+--38153-- REDIR: 0x4e980d0 (libc.so.6:strcspn) redirected to 0x48371a0 (_vgnU_ifunc_wrapper)
+--38153-- REDIR: 0x4ead6f0 (libc.so.6:wcscpy) redirected to 0x48371a0 (_vgnU_ifunc_wrapper)
+--38153-- REDIR: 0x4e98bc0 (libc.so.6:strncasecmp_l) redirected to 0x48371a0 (_vgnU_ifunc_wrapper)
+--38153-- REDIR: 0x4e96ec0 (libc.so.6:strchrnul) redirected to 0x48371a0 (_vgnU_ifunc_wrapper)
+--38153-- REDIR: 0x4e954c0 (libc.so.6:bcmp) redirected to 0x48371a0 (_vgnU_ifunc_wrapper)
+--38153-- REDIR: 0x4e98060 (libc.so.6:strcpy) redirected to 0x48371a0 (_vgnU_ifunc_wrapper)
+--38153-- REDIR: 0x4e96350 (libc.so.6:strcasecmp_l) redirected to 0x48371a0 (_vgnU_ifunc_wrapper)
+--38153-- REDIR: 0x4e98a90 (libc.so.6:strlen) redirected to 0x48371a0 (_vgnU_ifunc_wrapper)
+--38153-- REDIR: 0x4e98d60 (libc.so.6:strncpy) redirected to 0x48371a0 (_vgnU_ifunc_wrapper)
+--38153-- REDIR: 0x4e95d60 (libc.so.6:memmove) redirected to 0x48371a0 (_vgnU_ifunc_wrapper)
+==38153== Preferring higher priority redirection:
+--38153--     old: 0x04f55480 (__memcpy_avx_unalign) R-> (2018.0) 0x0484e190 __memcpy_avx_unaligned_erms
+--38153--     new: 0x04f55480 (__memcpy_avx_unalign) R-> (2018.1) 0x0484fc40 memmove
+--38153-- REDIR: 0x4e95440 (libc.so.6:memchr) redirected to 0x48371a0 (_vgnU_ifunc_wrapper)
+--38153-- REDIR: 0x4e990b0 (libc.so.6:strspn) redirected to 0x48371a0 (_vgnU_ifunc_wrapper)
+==38153== WARNING: new redirection conflicts with existing -- ignoring it
+--38153--     old: 0x04f55450 (__memcpy_chk_avx_una) R-> (2024.0) 0x04850830 __memmove_chk
+--38153--     new: 0x04f55450 (__memcpy_chk_avx_una) R-> (2030.0) 0x04850eb0 __memcpy_chk
+--38153-- REDIR: 0x4e99930 (libc.so.6:strstr) redirected to 0x48371a0 (_vgnU_ifunc_wrapper)
+==38153== WARNING: new redirection conflicts with existing -- ignoring it
+--38153--     old: 0x04f55450 (__memcpy_chk_avx_una) R-> (2024.0) 0x04850830 __memmove_chk
+--38153--     new: 0x04f55450 (__memcpy_chk_avx_una) R-> (2030.0) 0x04850eb0 __memcpy_chk
+--38153-- REDIR: 0x4eae130 (libc.so.6:wcsncmp) redirected to 0x48371a0 (_vgnU_ifunc_wrapper)
+--38153-- REDIR: 0x4f5a070 (libc.so.6:__strrchr_avx2) redirected to 0x484b340 (rindex)
+--38153-- REDIR: 0x4f581c0 (libc.so.6:__strlen_avx2) redirected to 0x484b9a0 (strlen)
+--38153-- REDIR: 0x4f54d20 (libc.so.6:__memcmp_avx2_movbe) redirected to 0x484f350 (bcmp)
+--38153-- REDIR: 0x4f592a0 (libc.so.6:__strncmp_avx2) redirected to 0x484c320 (strncmp)
+--38153-- REDIR: 0x4e91650 (libc.so.6:malloc) redirected to 0x4842710 (malloc)
+--38153-- REDIR: 0x4e926a0 (libc.so.6:calloc) redirected to 0x4849b40 (calloc)
+==38153== Downloading debug info for /usr/lib/libSDL2-2.0.so.0.3000.5...
+--38153--   Considering /home/sam/.cache/debuginfod_client/402f2b97f17d892f2670fd965f0d8665606a5c14/debuginfo ..
+--38153--   .. CRC is valid
+==38153== Successfully downloaded debug file for /usr/lib/libSDL2-2.0.so.0.3000.5
+--38153-- REDIR: 0x4e91f90 (libc.so.6:realloc) redirected to 0x4849da0 (realloc)
+--38153-- Reading syms from /usr/lib/libdbus-1.so.3.32.4
+--38153-- Reading syms from /usr/lib/libsystemd.so.0.39.0
+--38153-- Reading syms from /usr/lib/libcap.so.2.70
+==38153== WARNING: new redirection conflicts with existing -- ignoring it
+--38153--     old: 0x04f55450 (__memcpy_chk_avx_una) R-> (2024.0) 0x04850830 __memmove_chk
+--38153--     new: 0x04f55450 (__memcpy_chk_avx_una) R-> (2030.0) 0x04850eb0 __memcpy_chk
+==38153== WARNING: new redirection conflicts with existing -- ignoring it
+--38153--     old: 0x04f55450 (__memcpy_chk_avx_una) R-> (2024.0) 0x04850830 __memmove_chk
+--38153--     new: 0x04f55450 (__memcpy_chk_avx_una) R-> (2030.0) 0x04850eb0 __memcpy_chk
+--38153-- REDIR: 0x4e91d30 (libc.so.6:free) redirected to 0x4845860 (free)
+==38153== Downloading debug info for /usr/lib/libdbus-1.so.3.32.4...
+--38153--   Considering /home/sam/.cache/debuginfod_client/2e5c986493292691de71f15154efb3214e0a4f5f/debuginfo ..
+--38153--   .. CRC is valid
+==38153== Successfully downloaded debug file for /usr/lib/libdbus-1.so.3.32.4
+--38153-- REDIR: 0x4f55480 (libc.so.6:__memcpy_avx_unaligned_erms) redirected to 0x484fc40 (memmove)
+--38153-- REDIR: 0x4f57a10 (libc.so.6:__strcmp_avx2) redirected to 0x484cc00 (strcmp)
+--38153-- REDIR: 0x4f59900 (libc.so.6:__strncpy_avx2) redirected to 0x484bc70 (strncpy)
+--38153-- REDIR: 0x4f57820 (libc.so.6:__strchrnul_avx2) redirected to 0x48508a0 (strchrnul)
+--38153-- REDIR: 0x4f55e80 (libc.so.6:__memset_avx2_unaligned_erms) redirected to 0x484fb20 (memset)
+--38153-- Reading syms from /usr/lib/libX11.so.6.4.0
+--38153-- Reading syms from /usr/lib/libxcb.so.1.1.0
+--38153-- Reading syms from /usr/lib/libXau.so.6.0.0
+--38153-- Reading syms from /usr/lib/libXdmcp.so.6.0.0
+==38153== WARNING: new redirection conflicts with existing -- ignoring it
+--38153--     old: 0x04f55450 (__memcpy_chk_avx_una) R-> (2024.0) 0x04850830 __memmove_chk
+--38153--     new: 0x04f55450 (__memcpy_chk_avx_una) R-> (2030.0) 0x04850eb0 __memcpy_chk
+==38153== Downloading debug info for /usr/lib/libX11.so.6.4.0...
+--38153--   Considering /home/sam/.cache/debuginfod_client/9f2874ced5b9e6bde1fe1f1b3137e80a3be8ca85/debuginfo ..
+--38153--   .. CRC is valid
+==38153== Successfully downloaded debug file for /usr/lib/libX11.so.6.4.0
+--38153-- Reading syms from /usr/lib/libXext.so.6.4.0
+--38153-- Reading syms from /usr/lib/libXcursor.so.1.0.2
+--38153-- Reading syms from /usr/lib/libXrender.so.1.3.0
+--38153-- Reading syms from /usr/lib/libXfixes.so.3.1.0
+--38153-- Reading syms from /usr/lib/libXi.so.6.1.0
+==38153== WARNING: new redirection conflicts with existing -- ignoring it
+--38153--     old: 0x04f55450 (__memcpy_chk_avx_una) R-> (2024.0) 0x04850830 __memmove_chk
+--38153--     new: 0x04f55450 (__memcpy_chk_avx_una) R-> (2030.0) 0x04850eb0 __memcpy_chk
+--38153-- Reading syms from /usr/lib/libXrandr.so.2.2.0
+--38153-- Reading syms from /usr/lib/libXss.so.1.0.0
+--38153-- REDIR: 0x4f56130 (libc.so.6:__stpcpy_avx2) redirected to 0x484f470 (stpcpy)
+--38153-- REDIR: 0x4f55440 (libc.so.6:__mempcpy_avx_unaligned_erms) redirected to 0x48509b0 (mempcpy)
+--38153-- REDIR: 0x4f55450 (libc.so.6:__memcpy_chk_avx_unaligned_erms) redirected to 0x4850830 (__memmove_chk)
+==38153== Downloading debug info for /usr/lib/libxcb.so.1.1.0...
+--38153--   Considering /home/sam/.cache/debuginfod_client/000512796d517237a3358266e464b28718ad96a5/debuginfo ..
+--38153--   .. CRC is valid
+==38153== Successfully downloaded debug file for /usr/lib/libxcb.so.1.1.0
+--38153-- REDIR: 0x4f11600 (libc.so.6:__strcpy_chk) redirected to 0x4850910 (__strcpy_chk)
+==38153== Downloading debug info for /usr/lib/libXau.so.6.0.0...
+--38153--   Considering /home/sam/.cache/debuginfod_client/b10e53a67da2f4671b7f09a872c1640a5bb9d974/debuginfo ..
+--38153--   .. CRC is valid
+==38153== Successfully downloaded debug file for /usr/lib/libXau.so.6.0.0
+--38153-- REDIR: 0x4f57f70 (libc.so.6:__strcpy_avx2) redirected to 0x484baf0 (strcpy)
+==38153== Downloading debug info for /usr/lib/libXext.so.6.4.0...
+--38153--   Considering /home/sam/.cache/debuginfod_client/6831a77ee8af0e641a9d63702d7b360b9982b811/debuginfo ..
+--38153--   .. CRC is valid
+==38153== Successfully downloaded debug file for /usr/lib/libXext.so.6.4.0
+==38153== Downloading debug info for /usr/lib/libXrandr.so.2.2.0...
+--38153--   Considering /home/sam/.cache/debuginfod_client/ea8bd85d3d58ddbe0e452a284c6002fdd83f65ab/debuginfo ..
+--38153--   .. CRC is valid
+==38153== Successfully downloaded debug file for /usr/lib/libXrandr.so.2.2.0
+--38153-- REDIR: 0x4e93920 (libc.so.6:reallocarray) redirected to 0x484a080 (reallocarray)
+--38153-- REDIR: 0x4e98a20 (libc.so.6:strlcpy) redirected to 0x484c1f0 (strlcpy)
+==38153== Downloading debug info for /usr/lib/libXi.so.6.1.0...
+--38153--   Considering /home/sam/.cache/debuginfod_client/17628ed72959e68b65ee9826b92678b37f902fbc/debuginfo ..
+--38153--   .. CRC is valid
+==38153== Successfully downloaded debug file for /usr/lib/libXi.so.6.1.0
+==38153== Downloading debug info for /usr/lib/libXfixes.so.3.1.0...
+--38153--   Considering /home/sam/.cache/debuginfod_client/a43cf8422e78bdf739d9c453deb81df4a0e91ca6/debuginfo ..
+--38153--   .. CRC is valid
+==38153== Successfully downloaded debug file for /usr/lib/libXfixes.so.3.1.0
+--38153-- REDIR: 0x4ea9d90 (libc.so.6:__strstr_sse2_unaligned) redirected to 0x4850f30 (strstr)
+--38153-- REDIR: 0x4f575e0 (libc.so.6:__strchr_avx2) redirected to 0x484b520 (index)
+--38153-- REDIR: 0x4f54a80 (libc.so.6:__memchr_avx2) redirected to 0x484cd80 (memchr)
+--38153-- REDIR: 0x4f572d0 (libc.so.6:__strcat_avx2) redirected to 0x484b550 (strcat)
+==38153== Downloading debug info for /usr/lib/libXss.so.1.0.0...
+--38153--   Considering /home/sam/.cache/debuginfod_client/9748ec51b2bf756e2687c3f5704b83887c04ea44/debuginfo ..
+--38153--   .. CRC is valid
+==38153== Successfully downloaded debug file for /usr/lib/libXss.so.1.0.0
+--38153-- Reading syms from /usr/lib/libGL.so.1.7.0
+--38153-- Reading syms from /usr/lib/libGLdispatch.so.0.0.0
+--38153-- Reading syms from /usr/lib/libGLX.so.0.0.0
+==38153== Downloading debug info for /usr/lib/libGLdispatch.so.0.0.0...
+--38153--   Considering /home/sam/.cache/debuginfod_client/e58cf9f5a5e51bad415f574653dc266986a86198/debuginfo ..
+--38153--   .. CRC is valid
+==38153== Successfully downloaded debug file for /usr/lib/libGLdispatch.so.0.0.0
+==38153== Downloading debug info for /usr/lib/libGLX.so.0.0.0...
+--38153--   Considering /home/sam/.cache/debuginfod_client/37ff8da6f4b10ab01d014e0d5d94412e520fbef9/debuginfo ..
+--38153--   .. CRC is valid
+==38153== Successfully downloaded debug file for /usr/lib/libGLX.so.0.0.0
+==38153== Downloading debug info for /usr/lib/libGL.so.1.7.0...
+--38153--   Considering /home/sam/.cache/debuginfod_client/c00c5fcceeba1bcbcd092deb7ab9d75f9314baee/debuginfo ..
+--38153--   .. CRC is valid
+==38153== Successfully downloaded debug file for /usr/lib/libGL.so.1.7.0
+--38153-- REDIR: 0x4f77690 (libc.so.6:__strspn_sse42) redirected to 0x4851230 (strspn)
+--38153-- REDIR: 0x4f749f0 (libc.so.6:__strcspn_sse42) redirected to 0x4851130 (strcspn)
+--38153-- Reading syms from /usr/lib/libGLX_mesa.so.0.0.0
+--38153-- Reading syms from /usr/lib/libglapi.so.0.0.0
+--38153-- Reading syms from /usr/lib/libdrm.so.2.4.0
+--38153-- Reading syms from /usr/lib/libxcb-glx.so.0.0.0
+--38153-- Reading syms from /usr/lib/libX11-xcb.so.1.0.0
+--38153-- Reading syms from /usr/lib/libxcb-dri2.so.0.0.0
+--38153-- Reading syms from /usr/lib/libXxf86vm.so.1.0.0
+--38153-- Reading syms from /usr/lib/libxcb-shm.so.0.0.0
+--38153-- Reading syms from /usr/lib/libexpat.so.1.9.2
+--38153-- Reading syms from /usr/lib/libxshmfence.so.1.0.0
+--38153-- Reading syms from /usr/lib/libxcb-randr.so.0.1.0
+--38153-- Reading syms from /usr/lib/libxcb-dri3.so.0.1.0
+--38153-- Reading syms from /usr/lib/libxcb-present.so.0.0.0
+--38153-- Reading syms from /usr/lib/libxcb-sync.so.1.0.0
+--38153-- Reading syms from /usr/lib/libxcb-xfixes.so.0.0.0
+==38153== WARNING: new redirection conflicts with existing -- ignoring it
+--38153--     old: 0x04f55450 (__memcpy_chk_avx_una) R-> (2024.0) 0x04850830 __memmove_chk
+--38153--     new: 0x04f55450 (__memcpy_chk_avx_una) R-> (2030.0) 0x04850eb0 __memcpy_chk
+==38153== WARNING: new redirection conflicts with existing -- ignoring it
+--38153--     old: 0x04f55450 (__memcpy_chk_avx_una) R-> (2024.0) 0x04850830 __memmove_chk
+--38153--     new: 0x04f55450 (__memcpy_chk_avx_una) R-> (2030.0) 0x04850eb0 __memcpy_chk
+==38153== Downloading debug info for /usr/lib/libGLX_mesa.so.0.0.0...
+--38153--   Considering /home/sam/.cache/debuginfod_client/8bdf5b529ba8f9e728a74975916822b4ca8e5527/debuginfo ..
+--38153--   .. CRC is valid
+==38153== Successfully downloaded debug file for /usr/lib/libGLX_mesa.so.0.0.0
+==38153== Downloading debug info for /usr/lib/libxcb-glx.so.0.0.0...
+--38153--   Considering /home/sam/.cache/debuginfod_client/c2367e88b40000d0866499c780cdce03f39534a7/debuginfo ..
+--38153--   .. CRC is valid
+==38153== Successfully downloaded debug file for /usr/lib/libxcb-glx.so.0.0.0
+==38153== Downloading debug info for /usr/lib/libxcb-dri3.so.0.1.0...
+--38153--   Considering /home/sam/.cache/debuginfod_client/81e599ccef356dcd56eee45e615603ea2d605b22/debuginfo ..
+--38153--   .. CRC is valid
+==38153== Successfully downloaded debug file for /usr/lib/libxcb-dri3.so.0.1.0
+==38153== Downloading debug info for /usr/lib/libxcb-present.so.0.0.0...
+--38153--   Considering /home/sam/.cache/debuginfod_client/536a5240bdfb99c79a0f00f382ee9d3e31cef8a0/debuginfo ..
+--38153--   .. CRC is valid
+==38153== Successfully downloaded debug file for /usr/lib/libxcb-present.so.0.0.0
+==38153== Downloading debug info for /usr/lib/libxcb-xfixes.so.0.0.0...
+--38153--   Considering /home/sam/.cache/debuginfod_client/6fd138990ec28aa6a98ec9ae790595b330cbf4a1/debuginfo ..
+--38153--   .. CRC is valid
+==38153== Successfully downloaded debug file for /usr/lib/libxcb-xfixes.so.0.0.0
+==38153== Downloading debug info for /usr/lib/libexpat.so.1.9.2...
+--38153--   Considering /home/sam/.cache/debuginfod_client/74beacf39d2005a753e6bcb06e48394e0ec65dc3/debuginfo ..
+--38153--   .. CRC is valid
+==38153== Successfully downloaded debug file for /usr/lib/libexpat.so.1.9.2
+==38153== Downloading debug info for /usr/lib/libdrm.so.2.4.0...
+--38153--   Considering /home/sam/.cache/debuginfod_client/da70690cdb5090ab20ca0e9c98bed106b272f6b0/debuginfo ..
+--38153--   .. CRC is valid
+==38153== Successfully downloaded debug file for /usr/lib/libdrm.so.2.4.0
+--38153-- REDIR: 0x4f59da0 (libc.so.6:__strnlen_avx2) redirected to 0x484b940 (strnlen)
+--38153-- Reading syms from /usr/lib/dri/radeonsi_dri.so
+--38153-- Reading syms from /usr/lib/libLLVM.so.18.1
+--38153-- Reading syms from /usr/lib/libz.so.1.3.1
+--38153-- Reading syms from /usr/lib/libzstd.so.1.5.6
+--38153-- Reading syms from /usr/lib/libsensors.so.5.0.0
+--38153-- Reading syms from /usr/lib/libdrm_radeon.so.1.0.1
+--38153-- Reading syms from /usr/lib/libelf-0.191.so
+--38153-- Reading syms from /usr/lib/libdrm_amdgpu.so.1.0.0
+--38153-- Reading syms from /usr/lib/libdrm_intel.so.1.0.0
+--38153-- Reading syms from /usr/lib/libffi.so.8.1.4
+--38153-- Reading syms from /usr/lib/libedit.so.0.0.73
+--38153-- Reading syms from /usr/lib/libncursesw.so.6.5
+--38153-- Reading syms from /usr/lib/libxml2.so.2.13.2
+--38153-- Reading syms from /usr/lib/libpciaccess.so.0.11.1
+--38153-- Reading syms from /usr/lib/liblzma.so.5.6.2
+--38153-- Reading syms from /usr/lib/libicuuc.so.75.1
+==38153== WARNING: new redirection conflicts with existing -- ignoring it
+--38153--     old: 0x04f55450 (__memcpy_chk_avx_una) R-> (2024.0) 0x04850830 __memmove_chk
+--38153--     new: 0x04f55450 (__memcpy_chk_avx_una) R-> (2030.0) 0x04850eb0 __memcpy_chk
+==38153== WARNING: new redirection conflicts with existing -- ignoring it
+--38153--     old: 0x04f55450 (__memcpy_chk_avx_una) R-> (2024.0) 0x04850830 __memmove_chk
+--38153--     new: 0x04f55450 (__memcpy_chk_avx_una) R-> (2030.0) 0x04850eb0 __memcpy_chk
+--38153-- REDIR: 0x4e98c60 (libc.so.6:strncat) redirected to 0x48371a0 (_vgnU_ifunc_wrapper)
+==38153== WARNING: new redirection conflicts with existing -- ignoring it
+--38153--     old: 0x04f55450 (__memcpy_chk_avx_una) R-> (2024.0) 0x04850830 __memmove_chk
+--38153--     new: 0x04f55450 (__memcpy_chk_avx_una) R-> (2030.0) 0x04850eb0 __memcpy_chk
+==38153== WARNING: new redirection conflicts with existing -- ignoring it
+--38153--     old: 0x04f55450 (__memcpy_chk_avx_una) R-> (2024.0) 0x04850830 __memmove_chk
+--38153--     new: 0x04f55450 (__memcpy_chk_avx_una) R-> (2030.0) 0x04850eb0 __memcpy_chk
+==38153== WARNING: new redirection conflicts with existing -- ignoring it
+--38153--     old: 0x04f55450 (__memcpy_chk_avx_una) R-> (2024.0) 0x04850830 __memmove_chk
+--38153--     new: 0x04f55450 (__memcpy_chk_avx_una) R-> (2030.0) 0x04850eb0 __memcpy_chk
+==38153== WARNING: new redirection conflicts with existing -- ignoring it
+--38153--     old: 0x04f55450 (__memcpy_chk_avx_una) R-> (2024.0) 0x04850830 __memmove_chk
+--38153--     new: 0x04f55450 (__memcpy_chk_avx_una) R-> (2030.0) 0x04850eb0 __memcpy_chk
+--38153-- REDIR: 0x4e96120 (libc.so.6:rawmemchr) redirected to 0x48371a0 (_vgnU_ifunc_wrapper)
+==38153== WARNING: new redirection conflicts with existing -- ignoring it
+--38153--     old: 0x04f55450 (__memcpy_chk_avx_una) R-> (2024.0) 0x04850830 __memmove_chk
+--38153--     new: 0x04f55450 (__memcpy_chk_avx_una) R-> (2030.0) 0x04850eb0 __memcpy_chk
+==38153== WARNING: new redirection conflicts with existing -- ignoring it
+--38153--     old: 0x04f55450 (__memcpy_chk_avx_una) R-> (2024.0) 0x04850830 __memmove_chk
+--38153--     new: 0x04f55450 (__memcpy_chk_avx_una) R-> (2030.0) 0x04850eb0 __memcpy_chk
+==38153== WARNING: new redirection conflicts with existing -- ignoring it
+--38153--     old: 0x04f55450 (__memcpy_chk_avx_una) R-> (2024.0) 0x04850830 __memmove_chk
+--38153--     new: 0x04f55450 (__memcpy_chk_avx_una) R-> (2030.0) 0x04850eb0 __memcpy_chk
+==38153== Downloading debug info for /usr/lib/libLLVM.so.18.1...
+--38153--   Considering /home/sam/.cache/debuginfod_client/0df922aa272bd6567695e00eb31a45d10b7c64ee/debuginfo ..
+--38153--   .. CRC is valid
+==38153== Successfully downloaded debug file for /usr/lib/libLLVM.so.18.1
+--38153-- REDIR: 0x4aff760 (libstdc++.so.6:operator new(unsigned long, std::align_val_t)) redirected to 0x48434e0 (operator new(unsigned long, std::align_val_t))
+--38153-- REDIR: 0x4aff6c0 (libstdc++.so.6:operator new(unsigned long)) redirected to 0x4842f00 (operator new(unsigned long))
+--38153-- REDIR: 0x4afd790 (libstdc++.so.6:operator delete(void*, unsigned long)) redirected to 0x48467d0 (operator delete(void*, unsigned long))
+==38153== Downloading debug info for /usr/lib/dri/radeonsi_dri.so...
+--38153--   Considering /home/sam/.cache/debuginfod_client/f3859a515acf54d6d83e0356325449b0b541bc4a/debuginfo ..
+--38153--   .. CRC is valid
+==38153== Successfully downloaded debug file for /usr/lib/dri/radeonsi_dri.so
+--38153-- REDIR: 0x4aff880 (libstdc++.so.6:operator delete(void*, unsigned long, std::align_val_t)) redirected to 0x4847150 (operator delete(void*, unsigned long, std::align_val_t))
+--38153-- REDIR: 0x4aff730 (libstdc++.so.6:operator new[](unsigned long)) redirected to 0x4844580 (operator new[](unsigned long))
+--38153-- memcheck GC: 1000 nodes, 232 survivors (23.2%)
+--38153-- memcheck GC: 1014 new table size (driftup)
+==38153== Downloading debug info for /usr/lib/libdrm_amdgpu.so.1.0.0...
+--38153--   Considering /home/sam/.cache/debuginfod_client/5cb88d12efc98ce7fdf7aadfbff5d658a1338cb7/debuginfo ..
+--38153--   .. CRC is valid
+==38153== Successfully downloaded debug file for /usr/lib/libdrm_amdgpu.so.1.0.0
+--38153-- REDIR: 0x4e93340 (libc.so.6:posix_memalign) redirected to 0x484a880 (posix_memalign)
+--38153-- WARNING: Serious error when reading debug info
+--38153-- When reading debug info from /memfd:xshmfence (deleted):
+--38153-- failed to stat64/stat this file
+==38153== Downloading debug info for /usr/lib/libzstd.so.1.5.6...
+--38153--   Considering /home/sam/.cache/debuginfod_client/324a45222960937386dcc3609a8bd357b4e449d7/debuginfo ..
+--38153--   .. CRC is valid
+==38153== Successfully downloaded debug file for /usr/lib/libzstd.so.1.5.6
+==38153== Downloading debug info for /usr/lib/libelf-0.191.so...
+--38153--   Considering /home/sam/.cache/debuginfod_client/8046d8b26e8a050ae13e2d56ec7fbb83c41e2f50/debuginfo ..
+--38153--   .. CRC is valid
+==38153== Successfully downloaded debug file for /usr/lib/libelf-0.191.so
+==38153== Downloading debug info for /usr/lib/libxcb-sync.so.1.0.0...
+--38153--   Considering /home/sam/.cache/debuginfod_client/d1b37402faa437e852c3aadcacbca233e1d866bc/debuginfo ..
+--38153--   .. CRC is valid
+==38153== Successfully downloaded debug file for /usr/lib/libxcb-sync.so.1.0.0
+--38153-- WARNING: Serious error when reading debug info
+--38153-- When reading debug info from /memfd:xshmfence (deleted):
+--38153-- failed to stat64/stat this file
+--38153-- REDIR: 0x4afd7b0 (libstdc++.so.6:operator delete[](void*)) redirected to 0x4848160 (operator delete[](void*))
+--38153-- REDIR: 0x4afd780 (libstdc++.so.6:operator delete(void*)) redirected to 0x4846320 (operator delete(void*))
+--38153-- REDIR: 0x4afd7c0 (libstdc++.so.6:operator delete[](void*, unsigned long)) redirected to 0x4848610 (operator delete[](void*, unsigned long))
+--38153-- WARNING: Serious error when reading debug info
+--38153-- When reading debug info from /memfd:xshmfence (deleted):
+--38153-- failed to stat64/stat this file
+--38153-- WARNING: Serious error when reading debug info
+--38153-- When reading debug info from /memfd:xshmfence (deleted):
+--38153-- failed to stat64/stat this file
+==38153== Invalid read of size 8
+==38153==    at 0x10D9CF: get_neighbours(SDL_Renderer*, point, canonical_triangle***) (demo.cpp:75)
+==38153==    by 0x10DECD: generate_graph(SDL_Renderer*) (demo.cpp:120)
+==38153==    by 0x10F334: main (demo.cpp:310)
+==38153==  Address 0x1a4a8350 is 80 bytes inside a block of size 720 free'd
+==38153==    at 0x4849E20: realloc (vg_replace_malloc.c:1800)
+==38153==    by 0x10F0A9: main (demo.cpp:293)
+==38153==  Block was alloc'd at
+==38153==    at 0x4842788: malloc (vg_replace_malloc.c:446)
+==38153==    by 0x10E8EB: main (demo.cpp:231)
+==38153== 
+==38153== Invalid read of size 8
+==38153==    at 0x10D9D2: get_neighbours(SDL_Renderer*, point, canonical_triangle***) (demo.cpp:75)
+==38153==    by 0x10DECD: generate_graph(SDL_Renderer*) (demo.cpp:120)
+==38153==    by 0x10F334: main (demo.cpp:310)
+==38153==  Address 0x1a4a8358 is 88 bytes inside a block of size 720 free'd
+==38153==    at 0x4849E20: realloc (vg_replace_malloc.c:1800)
+==38153==    by 0x10F0A9: main (demo.cpp:293)
+==38153==  Block was alloc'd at
+==38153==    at 0x4842788: malloc (vg_replace_malloc.c:446)
+==38153==    by 0x10E8EB: main (demo.cpp:231)
+==38153== 
+==38153== Invalid read of size 8
+==38153==    at 0x10D9DD: get_neighbours(SDL_Renderer*, point, canonical_triangle***) (demo.cpp:75)
+==38153==    by 0x10DECD: generate_graph(SDL_Renderer*) (demo.cpp:120)
+==38153==    by 0x10F334: main (demo.cpp:310)
+==38153==  Address 0x1a4a8360 is 96 bytes inside a block of size 720 free'd
+==38153==    at 0x4849E20: realloc (vg_replace_malloc.c:1800)
+==38153==    by 0x10F0A9: main (demo.cpp:293)
+==38153==  Block was alloc'd at
+==38153==    at 0x4842788: malloc (vg_replace_malloc.c:446)
+==38153==    by 0x10E8EB: main (demo.cpp:231)
+==38153== 
+==38153== Invalid read of size 8
+==38153==    at 0x10D9E1: get_neighbours(SDL_Renderer*, point, canonical_triangle***) (demo.cpp:75)
+==38153==    by 0x10DECD: generate_graph(SDL_Renderer*) (demo.cpp:120)
+==38153==    by 0x10F334: main (demo.cpp:310)
+==38153==  Address 0x1a4a8368 is 104 bytes inside a block of size 720 free'd
+==38153==    at 0x4849E20: realloc (vg_replace_malloc.c:1800)
+==38153==    by 0x10F0A9: main (demo.cpp:293)
+==38153==  Block was alloc'd at
+==38153==    at 0x4842788: malloc (vg_replace_malloc.c:446)
+==38153==    by 0x10E8EB: main (demo.cpp:231)
+==38153== 
+==38153== Invalid read of size 8
+==38153==    at 0x10D9ED: get_neighbours(SDL_Renderer*, point, canonical_triangle***) (demo.cpp:75)
+==38153==    by 0x10DECD: generate_graph(SDL_Renderer*) (demo.cpp:120)
+==38153==    by 0x10F334: main (demo.cpp:310)
+==38153==  Address 0x1a4a8370 is 112 bytes inside a block of size 720 free'd
+==38153==    at 0x4849E20: realloc (vg_replace_malloc.c:1800)
+==38153==    by 0x10F0A9: main (demo.cpp:293)
+==38153==  Block was alloc'd at
+==38153==    at 0x4842788: malloc (vg_replace_malloc.c:446)
+==38153==    by 0x10E8EB: main (demo.cpp:231)
+==38153== 
+==38153== Invalid read of size 8
+==38153==    at 0x10DA45: get_neighbours(SDL_Renderer*, point, canonical_triangle***) (demo.cpp:76)
+==38153==    by 0x10DECD: generate_graph(SDL_Renderer*) (demo.cpp:120)
+==38153==    by 0x10F334: main (demo.cpp:310)
+==38153==  Address 0x1a4a8378 is 120 bytes inside a block of size 720 free'd
+==38153==    at 0x4849E20: realloc (vg_replace_malloc.c:1800)
+==38153==    by 0x10F0A9: main (demo.cpp:293)
+==38153==  Block was alloc'd at
+==38153==    at 0x4842788: malloc (vg_replace_malloc.c:446)
+==38153==    by 0x10E8EB: main (demo.cpp:231)
+==38153== 
+==38153== Invalid read of size 8
+==38153==    at 0x10DA48: get_neighbours(SDL_Renderer*, point, canonical_triangle***) (demo.cpp:76)
+==38153==    by 0x10DECD: generate_graph(SDL_Renderer*) (demo.cpp:120)
+==38153==    by 0x10F334: main (demo.cpp:310)
+==38153==  Address 0x1a4a8380 is 128 bytes inside a block of size 720 free'd
+==38153==    at 0x4849E20: realloc (vg_replace_malloc.c:1800)
+==38153==    by 0x10F0A9: main (demo.cpp:293)
+==38153==  Block was alloc'd at
+==38153==    at 0x4842788: malloc (vg_replace_malloc.c:446)
+==38153==    by 0x10E8EB: main (demo.cpp:231)
+==38153== 
+==38153== Invalid read of size 8
+==38153==    at 0x10DA53: get_neighbours(SDL_Renderer*, point, canonical_triangle***) (demo.cpp:76)
+==38153==    by 0x10DECD: generate_graph(SDL_Renderer*) (demo.cpp:120)
+==38153==    by 0x10F334: main (demo.cpp:310)
+==38153==  Address 0x1a4a8388 is 136 bytes inside a block of size 720 free'd
+==38153==    at 0x4849E20: realloc (vg_replace_malloc.c:1800)
+==38153==    by 0x10F0A9: main (demo.cpp:293)
+==38153==  Block was alloc'd at
+==38153==    at 0x4842788: malloc (vg_replace_malloc.c:446)
+==38153==    by 0x10E8EB: main (demo.cpp:231)
+==38153== 
+==38153== Invalid read of size 8
+==38153==    at 0x10DA57: get_neighbours(SDL_Renderer*, point, canonical_triangle***) (demo.cpp:76)
+==38153==    by 0x10DECD: generate_graph(SDL_Renderer*) (demo.cpp:120)
+==38153==    by 0x10F334: main (demo.cpp:310)
+==38153==  Address 0x1a4a8390 is 144 bytes inside a block of size 720 free'd
+==38153==    at 0x4849E20: realloc (vg_replace_malloc.c:1800)
+==38153==    by 0x10F0A9: main (demo.cpp:293)
+==38153==  Block was alloc'd at
+==38153==    at 0x4842788: malloc (vg_replace_malloc.c:446)
+==38153==    by 0x10E8EB: main (demo.cpp:231)
+==38153== 
+==38153== Invalid read of size 8
+==38153==    at 0x10DA63: get_neighbours(SDL_Renderer*, point, canonical_triangle***) (demo.cpp:76)
+==38153==    by 0x10DECD: generate_graph(SDL_Renderer*) (demo.cpp:120)
+==38153==    by 0x10F334: main (demo.cpp:310)
+==38153==  Address 0x1a4a8398 is 152 bytes inside a block of size 720 free'd
+==38153==    at 0x4849E20: realloc (vg_replace_malloc.c:1800)
+==38153==    by 0x10F0A9: main (demo.cpp:293)
+==38153==  Block was alloc'd at
+==38153==    at 0x4842788: malloc (vg_replace_malloc.c:446)
+==38153==    by 0x10E8EB: main (demo.cpp:231)
+==38153== 
+==38153== Invalid read of size 8
+==38153==    at 0x10A535: get_intersect(edge, edge) (algorithms.cpp:66)
+==38153==    by 0x10A8C6: is_visible(point, point, edge*, int) (algorithms.cpp:96)
+==38153==    by 0x10D89A: get_canonical_tri(point, double, double) (demo.cpp:48)
+==38153==    by 0x10DDBF: get_neighbours(SDL_Renderer*, point, canonical_triangle***) (demo.cpp:103)
+==38153==    by 0x10DECD: generate_graph(SDL_Renderer*) (demo.cpp:120)
+==38153==    by 0x10F334: main (demo.cpp:310)
+==38153==  Address 0x1a4a8350 is 80 bytes inside a block of size 720 free'd
+==38153==    at 0x4849E20: realloc (vg_replace_malloc.c:1800)
+==38153==    by 0x10F0A9: main (demo.cpp:293)
+==38153==  Block was alloc'd at
+==38153==    at 0x4842788: malloc (vg_replace_malloc.c:446)
+==38153==    by 0x10E8EB: main (demo.cpp:231)
+==38153== 
+==38153== Invalid read of size 8
+==38153==    at 0x10A545: get_intersect(edge, edge) (algorithms.cpp:67)
+==38153==    by 0x10A8C6: is_visible(point, point, edge*, int) (algorithms.cpp:96)
+==38153==    by 0x10D89A: get_canonical_tri(point, double, double) (demo.cpp:48)
+==38153==    by 0x10DDBF: get_neighbours(SDL_Renderer*, point, canonical_triangle***) (demo.cpp:103)
+==38153==    by 0x10DECD: generate_graph(SDL_Renderer*) (demo.cpp:120)
+==38153==    by 0x10F334: main (demo.cpp:310)
+==38153==  Address 0x1a4a8378 is 120 bytes inside a block of size 720 free'd
+==38153==    at 0x4849E20: realloc (vg_replace_malloc.c:1800)
+==38153==    by 0x10F0A9: main (demo.cpp:293)
+==38153==  Block was alloc'd at
+==38153==    at 0x4842788: malloc (vg_replace_malloc.c:446)
+==38153==    by 0x10E8EB: main (demo.cpp:231)
+==38153== 
+==38153== Invalid read of size 8
+==38153==    at 0x10A575: get_intersect(edge, edge) (algorithms.cpp:71)
+==38153==    by 0x10A8C6: is_visible(point, point, edge*, int) (algorithms.cpp:96)
+==38153==    by 0x10D89A: get_canonical_tri(point, double, double) (demo.cpp:48)
+==38153==    by 0x10DDBF: get_neighbours(SDL_Renderer*, point, canonical_triangle***) (demo.cpp:103)
+==38153==    by 0x10DECD: generate_graph(SDL_Renderer*) (demo.cpp:120)
+==38153==    by 0x10F334: main (demo.cpp:310)
+==38153==  Address 0x1a4a8358 is 88 bytes inside a block of size 720 free'd
+==38153==    at 0x4849E20: realloc (vg_replace_malloc.c:1800)
+==38153==    by 0x10F0A9: main (demo.cpp:293)
+==38153==  Block was alloc'd at
+==38153==    at 0x4842788: malloc (vg_replace_malloc.c:446)
+==38153==    by 0x10E8EB: main (demo.cpp:231)
+==38153== 
+==38153== Invalid read of size 8
+==38153==    at 0x10A586: get_intersect(edge, edge) (algorithms.cpp:72)
+==38153==    by 0x10A8C6: is_visible(point, point, edge*, int) (algorithms.cpp:96)
+==38153==    by 0x10D89A: get_canonical_tri(point, double, double) (demo.cpp:48)
+==38153==    by 0x10DDBF: get_neighbours(SDL_Renderer*, point, canonical_triangle***) (demo.cpp:103)
+==38153==    by 0x10DECD: generate_graph(SDL_Renderer*) (demo.cpp:120)
+==38153==    by 0x10F334: main (demo.cpp:310)
+==38153==  Address 0x1a4a8380 is 128 bytes inside a block of size 720 free'd
+==38153==    at 0x4849E20: realloc (vg_replace_malloc.c:1800)
+==38153==    by 0x10F0A9: main (demo.cpp:293)
+==38153==  Block was alloc'd at
+==38153==    at 0x4842788: malloc (vg_replace_malloc.c:446)
+==38153==    by 0x10E8EB: main (demo.cpp:231)
+==38153== 
+==38153== Invalid read of size 8
+==38153==    at 0x10DAFC: get_neighbours(SDL_Renderer*, point, canonical_triangle***) (demo.cpp:81)
+==38153==    by 0x10DECD: generate_graph(SDL_Renderer*) (demo.cpp:120)
+==38153==    by 0x10F334: main (demo.cpp:310)
+==38153==  Address 0x1a4a8378 is 120 bytes inside a block of size 720 free'd
+==38153==    at 0x4849E20: realloc (vg_replace_malloc.c:1800)
+==38153==    by 0x10F0A9: main (demo.cpp:293)
+==38153==  Block was alloc'd at
+==38153==    at 0x4842788: malloc (vg_replace_malloc.c:446)
+==38153==    by 0x10E8EB: main (demo.cpp:231)
+==38153== 
+==38153== Invalid read of size 8
+==38153==    at 0x10DB11: get_neighbours(SDL_Renderer*, point, canonical_triangle***) (demo.cpp:81)
+==38153==    by 0x10DECD: generate_graph(SDL_Renderer*) (demo.cpp:120)
+==38153==    by 0x10F334: main (demo.cpp:310)
+==38153==  Address 0x1a4a8380 is 128 bytes inside a block of size 720 free'd
+==38153==    at 0x4849E20: realloc (vg_replace_malloc.c:1800)
+==38153==    by 0x10F0A9: main (demo.cpp:293)
+==38153==  Block was alloc'd at
+==38153==    at 0x4842788: malloc (vg_replace_malloc.c:446)
+==38153==    by 0x10E8EB: main (demo.cpp:231)
+==38153== 
+==38153== Invalid read of size 8
+==38153==    at 0x10DF44: generate_graph(SDL_Renderer*) (demo.cpp:126)
+==38153==    by 0x10F334: main (demo.cpp:310)
+==38153==  Address 0x1a4a8378 is 120 bytes inside a block of size 720 free'd
+==38153==    at 0x4849E20: realloc (vg_replace_malloc.c:1800)
+==38153==    by 0x10F0A9: main (demo.cpp:293)
+==38153==  Block was alloc'd at
+==38153==    at 0x4842788: malloc (vg_replace_malloc.c:446)
+==38153==    by 0x10E8EB: main (demo.cpp:231)
+==38153== 
+==38153== Invalid read of size 8
+==38153==    at 0x10DF47: generate_graph(SDL_Renderer*) (demo.cpp:126)
+==38153==    by 0x10F334: main (demo.cpp:310)
+==38153==  Address 0x1a4a8380 is 128 bytes inside a block of size 720 free'd
+==38153==    at 0x4849E20: realloc (vg_replace_malloc.c:1800)
+==38153==    by 0x10F0A9: main (demo.cpp:293)
+==38153==  Block was alloc'd at
+==38153==    at 0x4842788: malloc (vg_replace_malloc.c:446)
+==38153==    by 0x10E8EB: main (demo.cpp:231)
+==38153== 
+==38153== Invalid read of size 8
+==38153==    at 0x10DF52: generate_graph(SDL_Renderer*) (demo.cpp:126)
+==38153==    by 0x10F334: main (demo.cpp:310)
+==38153==  Address 0x1a4a8388 is 136 bytes inside a block of size 720 free'd
+==38153==    at 0x4849E20: realloc (vg_replace_malloc.c:1800)
+==38153==    by 0x10F0A9: main (demo.cpp:293)
+==38153==  Block was alloc'd at
+==38153==    at 0x4842788: malloc (vg_replace_malloc.c:446)
+==38153==    by 0x10E8EB: main (demo.cpp:231)
+==38153== 
+==38153== Invalid read of size 8
+==38153==    at 0x10DF56: generate_graph(SDL_Renderer*) (demo.cpp:126)
+==38153==    by 0x10F334: main (demo.cpp:310)
+==38153==  Address 0x1a4a8390 is 144 bytes inside a block of size 720 free'd
+==38153==    at 0x4849E20: realloc (vg_replace_malloc.c:1800)
+==38153==    by 0x10F0A9: main (demo.cpp:293)
+==38153==  Block was alloc'd at
+==38153==    at 0x4842788: malloc (vg_replace_malloc.c:446)
+==38153==    by 0x10E8EB: main (demo.cpp:231)
+==38153== 
+==38153== Invalid read of size 8
+==38153==    at 0x10DF62: generate_graph(SDL_Renderer*) (demo.cpp:126)
+==38153==    by 0x10F334: main (demo.cpp:310)
+==38153==  Address 0x1a4a8398 is 152 bytes inside a block of size 720 free'd
+==38153==    at 0x4849E20: realloc (vg_replace_malloc.c:1800)
+==38153==    by 0x10F0A9: main (demo.cpp:293)
+==38153==  Block was alloc'd at
+==38153==    at 0x4842788: malloc (vg_replace_malloc.c:446)
+==38153==    by 0x10E8EB: main (demo.cpp:231)
+==38153== 
+==38153== Invalid read of size 4
+==38153==    at 0x10E199: generate_graph(SDL_Renderer*) (demo.cpp:139)
+==38153==    by 0x10F334: main (demo.cpp:310)
+==38153==  Address 0x1a4a8390 is 144 bytes inside a block of size 720 free'd
+==38153==    at 0x4849E20: realloc (vg_replace_malloc.c:1800)
+==38153==    by 0x10F0A9: main (demo.cpp:293)
+==38153==  Block was alloc'd at
+==38153==    at 0x4842788: malloc (vg_replace_malloc.c:446)
+==38153==    by 0x10E8EB: main (demo.cpp:231)
+==38153== 
+==38153== Invalid read of size 4
+==38153==    at 0x10E1C6: generate_graph(SDL_Renderer*) (demo.cpp:147)
+==38153==    by 0x10F334: main (demo.cpp:310)
+==38153==  Address 0x1a4a8390 is 144 bytes inside a block of size 720 free'd
+==38153==    at 0x4849E20: realloc (vg_replace_malloc.c:1800)
+==38153==    by 0x10F0A9: main (demo.cpp:293)
+==38153==  Block was alloc'd at
+==38153==    at 0x4842788: malloc (vg_replace_malloc.c:446)
+==38153==    by 0x10E8EB: main (demo.cpp:231)
+==38153== 
+==38153== Invalid write of size 4
+==38153==    at 0x10E1CC: generate_graph(SDL_Renderer*) (demo.cpp:147)
+==38153==    by 0x10F334: main (demo.cpp:310)
+==38153==  Address 0x1a4a8390 is 144 bytes inside a block of size 720 free'd
+==38153==    at 0x4849E20: realloc (vg_replace_malloc.c:1800)
+==38153==    by 0x10F0A9: main (demo.cpp:293)
+==38153==  Block was alloc'd at
+==38153==    at 0x4842788: malloc (vg_replace_malloc.c:446)
+==38153==    by 0x10E8EB: main (demo.cpp:231)
+==38153== 
+==38153== Invalid read of size 4
+==38153==    at 0x10E1CF: generate_graph(SDL_Renderer*) (demo.cpp:147)
+==38153==    by 0x10F334: main (demo.cpp:310)
+==38153==  Address 0x1a4a8390 is 144 bytes inside a block of size 720 free'd
+==38153==    at 0x4849E20: realloc (vg_replace_malloc.c:1800)
+==38153==    by 0x10F0A9: main (demo.cpp:293)
+==38153==  Block was alloc'd at
+==38153==    at 0x4842788: malloc (vg_replace_malloc.c:446)
+==38153==    by 0x10E8EB: main (demo.cpp:231)
+==38153== 
+==38153== Invalid read of size 8
+==38153==    at 0x10E1F3: generate_graph(SDL_Renderer*) (demo.cpp:147)
+==38153==    by 0x10F334: main (demo.cpp:310)
+==38153==  Address 0x1a4a8388 is 136 bytes inside a block of size 720 free'd
+==38153==    at 0x4849E20: realloc (vg_replace_malloc.c:1800)
+==38153==    by 0x10F0A9: main (demo.cpp:293)
+==38153==  Block was alloc'd at
+==38153==    at 0x4842788: malloc (vg_replace_malloc.c:446)
+==38153==    by 0x10E8EB: main (demo.cpp:231)
+==38153== 
+==38153== Invalid write of size 8
+==38153==    at 0x10E219: generate_graph(SDL_Renderer*) (demo.cpp:147)
+==38153==    by 0x10F334: main (demo.cpp:310)
+==38153==  Address 0x1a4a8388 is 136 bytes inside a block of size 720 free'd
+==38153==    at 0x4849E20: realloc (vg_replace_malloc.c:1800)
+==38153==    by 0x10F0A9: main (demo.cpp:293)
+==38153==  Block was alloc'd at
+==38153==    at 0x4842788: malloc (vg_replace_malloc.c:446)
+==38153==    by 0x10E8EB: main (demo.cpp:231)
+==38153== 
+==38153== Invalid read of size 8
+==38153==    at 0x10E2DA: generate_graph(SDL_Renderer*) (demo.cpp:153)
+==38153==    by 0x10F334: main (demo.cpp:310)
+==38153==  Address 0x1a4a8388 is 136 bytes inside a block of size 720 free'd
+==38153==    at 0x4849E20: realloc (vg_replace_malloc.c:1800)
+==38153==    by 0x10F0A9: main (demo.cpp:293)
+==38153==  Block was alloc'd at
+==38153==    at 0x4842788: malloc (vg_replace_malloc.c:446)
+==38153==    by 0x10E8EB: main (demo.cpp:231)
+==38153== 
+==38153== Invalid read of size 4
+==38153==    at 0x10E2F5: generate_graph(SDL_Renderer*) (demo.cpp:153)
+==38153==    by 0x10F334: main (demo.cpp:310)
+==38153==  Address 0x1a4a8390 is 144 bytes inside a block of size 720 free'd
+==38153==    at 0x4849E20: realloc (vg_replace_malloc.c:1800)
+==38153==    by 0x10F0A9: main (demo.cpp:293)
+==38153==  Block was alloc'd at
+==38153==    at 0x4842788: malloc (vg_replace_malloc.c:446)
+==38153==    by 0x10E8EB: main (demo.cpp:231)
+==38153== 
+==38153== Invalid read of size 8
+==38153==    at 0x10DF71: generate_graph(SDL_Renderer*) (demo.cpp:126)
+==38153==    by 0x10F334: main (demo.cpp:310)
+==38153==  Address 0x1a4a8378 is 120 bytes inside a block of size 720 free'd
+==38153==    at 0x4849E20: realloc (vg_replace_malloc.c:1800)
+==38153==    by 0x10F0A9: main (demo.cpp:293)
+==38153==  Block was alloc'd at
+==38153==    at 0x4842788: malloc (vg_replace_malloc.c:446)
+==38153==    by 0x10E8EB: main (demo.cpp:231)
+==38153== 
+==38153== Invalid read of size 8
+==38153==    at 0x10DF74: generate_graph(SDL_Renderer*) (demo.cpp:126)
+==38153==    by 0x10F334: main (demo.cpp:310)
+==38153==  Address 0x1a4a8380 is 128 bytes inside a block of size 720 free'd
+==38153==    at 0x4849E20: realloc (vg_replace_malloc.c:1800)
+==38153==    by 0x10F0A9: main (demo.cpp:293)
+==38153==  Block was alloc'd at
+==38153==    at 0x4842788: malloc (vg_replace_malloc.c:446)
+==38153==    by 0x10E8EB: main (demo.cpp:231)
+==38153== 
+==38153== Invalid read of size 8
+==38153==    at 0x10DF7F: generate_graph(SDL_Renderer*) (demo.cpp:126)
+==38153==    by 0x10F334: main (demo.cpp:310)
+==38153==  Address 0x1a4a8388 is 136 bytes inside a block of size 720 free'd
+==38153==    at 0x4849E20: realloc (vg_replace_malloc.c:1800)
+==38153==    by 0x10F0A9: main (demo.cpp:293)
+==38153==  Block was alloc'd at
+==38153==    at 0x4842788: malloc (vg_replace_malloc.c:446)
+==38153==    by 0x10E8EB: main (demo.cpp:231)
+==38153== 
+==38153== Invalid read of size 8
+==38153==    at 0x10DF83: generate_graph(SDL_Renderer*) (demo.cpp:126)
+==38153==    by 0x10F334: main (demo.cpp:310)
+==38153==  Address 0x1a4a8390 is 144 bytes inside a block of size 720 free'd
+==38153==    at 0x4849E20: realloc (vg_replace_malloc.c:1800)
+==38153==    by 0x10F0A9: main (demo.cpp:293)
+==38153==  Block was alloc'd at
+==38153==    at 0x4842788: malloc (vg_replace_malloc.c:446)
+==38153==    by 0x10E8EB: main (demo.cpp:231)
+==38153== 
+==38153== Invalid read of size 8
+==38153==    at 0x10DF8F: generate_graph(SDL_Renderer*) (demo.cpp:126)
+==38153==    by 0x10F334: main (demo.cpp:310)
+==38153==  Address 0x1a4a8398 is 152 bytes inside a block of size 720 free'd
+==38153==    at 0x4849E20: realloc (vg_replace_malloc.c:1800)
+==38153==    by 0x10F0A9: main (demo.cpp:293)
+==38153==  Block was alloc'd at
+==38153==    at 0x4842788: malloc (vg_replace_malloc.c:446)
+==38153==    by 0x10E8EB: main (demo.cpp:231)
+==38153== 
+==38153== Invalid read of size 8
+==38153==    at 0x10A535: get_intersect(edge, edge) (algorithms.cpp:66)
+==38153==    by 0x10A8C6: is_visible(point, point, edge*, int) (algorithms.cpp:96)
+==38153==    by 0x10D89A: get_canonical_tri(point, double, double) (demo.cpp:48)
+==38153==    by 0x10DCB9: get_neighbours(SDL_Renderer*, point, canonical_triangle***) (demo.cpp:95)
+==38153==    by 0x10DECD: generate_graph(SDL_Renderer*) (demo.cpp:120)
+==38153==    by 0x10F334: main (demo.cpp:310)
+==38153==  Address 0x1a4a8350 is 80 bytes inside a block of size 720 free'd
+==38153==    at 0x4849E20: realloc (vg_replace_malloc.c:1800)
+==38153==    by 0x10F0A9: main (demo.cpp:293)
+==38153==  Block was alloc'd at
+==38153==    at 0x4842788: malloc (vg_replace_malloc.c:446)
+==38153==    by 0x10E8EB: main (demo.cpp:231)
+==38153== 
+==38153== Invalid read of size 8
+==38153==    at 0x10A545: get_intersect(edge, edge) (algorithms.cpp:67)
+==38153==    by 0x10A8C6: is_visible(point, point, edge*, int) (algorithms.cpp:96)
+==38153==    by 0x10D89A: get_canonical_tri(point, double, double) (demo.cpp:48)
+==38153==    by 0x10DCB9: get_neighbours(SDL_Renderer*, point, canonical_triangle***) (demo.cpp:95)
+==38153==    by 0x10DECD: generate_graph(SDL_Renderer*) (demo.cpp:120)
+==38153==    by 0x10F334: main (demo.cpp:310)
+==38153==  Address 0x1a4a8378 is 120 bytes inside a block of size 720 free'd
+==38153==    at 0x4849E20: realloc (vg_replace_malloc.c:1800)
+==38153==    by 0x10F0A9: main (demo.cpp:293)
+==38153==  Block was alloc'd at
+==38153==    at 0x4842788: malloc (vg_replace_malloc.c:446)
+==38153==    by 0x10E8EB: main (demo.cpp:231)
+==38153== 
+==38153== Invalid read of size 8
+==38153==    at 0x10A575: get_intersect(edge, edge) (algorithms.cpp:71)
+==38153==    by 0x10A8C6: is_visible(point, point, edge*, int) (algorithms.cpp:96)
+==38153==    by 0x10D89A: get_canonical_tri(point, double, double) (demo.cpp:48)
+==38153==    by 0x10DCB9: get_neighbours(SDL_Renderer*, point, canonical_triangle***) (demo.cpp:95)
+==38153==    by 0x10DECD: generate_graph(SDL_Renderer*) (demo.cpp:120)
+==38153==    by 0x10F334: main (demo.cpp:310)
+==38153==  Address 0x1a4a8358 is 88 bytes inside a block of size 720 free'd
+==38153==    at 0x4849E20: realloc (vg_replace_malloc.c:1800)
+==38153==    by 0x10F0A9: main (demo.cpp:293)
+==38153==  Block was alloc'd at
+==38153==    at 0x4842788: malloc (vg_replace_malloc.c:446)
+==38153==    by 0x10E8EB: main (demo.cpp:231)
+==38153== 
+==38153== Invalid read of size 8
+==38153==    at 0x10A586: get_intersect(edge, edge) (algorithms.cpp:72)
+==38153==    by 0x10A8C6: is_visible(point, point, edge*, int) (algorithms.cpp:96)
+==38153==    by 0x10D89A: get_canonical_tri(point, double, double) (demo.cpp:48)
+==38153==    by 0x10DCB9: get_neighbours(SDL_Renderer*, point, canonical_triangle***) (demo.cpp:95)
+==38153==    by 0x10DECD: generate_graph(SDL_Renderer*) (demo.cpp:120)
+==38153==    by 0x10F334: main (demo.cpp:310)
+==38153==  Address 0x1a4a8380 is 128 bytes inside a block of size 720 free'd
+==38153==    at 0x4849E20: realloc (vg_replace_malloc.c:1800)
+==38153==    by 0x10F0A9: main (demo.cpp:293)
+==38153==  Block was alloc'd at
+==38153==    at 0x4842788: malloc (vg_replace_malloc.c:446)
+==38153==    by 0x10E8EB: main (demo.cpp:231)
+==38153== 
+==38153== Invalid read of size 8
+==38153==    at 0x109A49: draw(SDL_Renderer*, point*, int, edge*, int, point, point) (graphics.cpp:48)
+==38153==    by 0x10F529: main (demo.cpp:343)
+==38153==  Address 0x1a4a8378 is 120 bytes inside a block of size 720 free'd
+==38153==    at 0x4849E20: realloc (vg_replace_malloc.c:1800)
+==38153==    by 0x10F0A9: main (demo.cpp:293)
+==38153==  Block was alloc'd at
+==38153==    at 0x4842788: malloc (vg_replace_malloc.c:446)
+==38153==    by 0x10E8EB: main (demo.cpp:231)
+==38153== 
+==38153== Invalid read of size 8
+==38153==    at 0x109A4C: draw(SDL_Renderer*, point*, int, edge*, int, point, point) (graphics.cpp:48)
+==38153==    by 0x10F529: main (demo.cpp:343)
+==38153==  Address 0x1a4a8380 is 128 bytes inside a block of size 720 free'd
+==38153==    at 0x4849E20: realloc (vg_replace_malloc.c:1800)
+==38153==    by 0x10F0A9: main (demo.cpp:293)
+==38153==  Block was alloc'd at
+==38153==    at 0x4842788: malloc (vg_replace_malloc.c:446)
+==38153==    by 0x10E8EB: main (demo.cpp:231)
+==38153== 
+==38153== Invalid read of size 8
+==38153==    at 0x109A57: draw(SDL_Renderer*, point*, int, edge*, int, point, point) (graphics.cpp:48)
+==38153==    by 0x10F529: main (demo.cpp:343)
+==38153==  Address 0x1a4a8388 is 136 bytes inside a block of size 720 free'd
+==38153==    at 0x4849E20: realloc (vg_replace_malloc.c:1800)
+==38153==    by 0x10F0A9: main (demo.cpp:293)
+==38153==  Block was alloc'd at
+==38153==    at 0x4842788: malloc (vg_replace_malloc.c:446)
+==38153==    by 0x10E8EB: main (demo.cpp:231)
+==38153== 
+==38153== Invalid read of size 8
+==38153==    at 0x109A5B: draw(SDL_Renderer*, point*, int, edge*, int, point, point) (graphics.cpp:48)
+==38153==    by 0x10F529: main (demo.cpp:343)
+==38153==  Address 0x1a4a8390 is 144 bytes inside a block of size 720 free'd
+==38153==    at 0x4849E20: realloc (vg_replace_malloc.c:1800)
+==38153==    by 0x10F0A9: main (demo.cpp:293)
+==38153==  Block was alloc'd at
+==38153==    at 0x4842788: malloc (vg_replace_malloc.c:446)
+==38153==    by 0x10E8EB: main (demo.cpp:231)
+==38153== 
+==38153== Invalid read of size 8
+==38153==    at 0x109A67: draw(SDL_Renderer*, point*, int, edge*, int, point, point) (graphics.cpp:48)
+==38153==    by 0x10F529: main (demo.cpp:343)
+==38153==  Address 0x1a4a8398 is 152 bytes inside a block of size 720 free'd
+==38153==    at 0x4849E20: realloc (vg_replace_malloc.c:1800)
+==38153==    by 0x10F0A9: main (demo.cpp:293)
+==38153==  Block was alloc'd at
+==38153==    at 0x4842788: malloc (vg_replace_malloc.c:446)
+==38153==    by 0x10E8EB: main (demo.cpp:231)
+==38153== 
+==38153== Invalid read of size 8
+==38153==    at 0x109C70: draw(SDL_Renderer*, point*, int, edge*, int, point, point) (graphics.cpp:57)
+==38153==    by 0x10F529: main (demo.cpp:343)
+==38153==  Address 0x1a4a8350 is 80 bytes inside a block of size 720 free'd
+==38153==    at 0x4849E20: realloc (vg_replace_malloc.c:1800)
+==38153==    by 0x10F0A9: main (demo.cpp:293)
+==38153==  Block was alloc'd at
+==38153==    at 0x4842788: malloc (vg_replace_malloc.c:446)
+==38153==    by 0x10E8EB: main (demo.cpp:231)
+==38153== 
+==38153== Invalid read of size 8
+==38153==    at 0x109C73: draw(SDL_Renderer*, point*, int, edge*, int, point, point) (graphics.cpp:57)
+==38153==    by 0x10F529: main (demo.cpp:343)
+==38153==  Address 0x1a4a8358 is 88 bytes inside a block of size 720 free'd
+==38153==    at 0x4849E20: realloc (vg_replace_malloc.c:1800)
+==38153==    by 0x10F0A9: main (demo.cpp:293)
+==38153==  Block was alloc'd at
+==38153==    at 0x4842788: malloc (vg_replace_malloc.c:446)
+==38153==    by 0x10E8EB: main (demo.cpp:231)
+==38153== 
+==38153== Invalid read of size 8
+==38153==    at 0x109C85: draw(SDL_Renderer*, point*, int, edge*, int, point, point) (graphics.cpp:57)
+==38153==    by 0x10F529: main (demo.cpp:343)
+==38153==  Address 0x1a4a8360 is 96 bytes inside a block of size 720 free'd
+==38153==    at 0x4849E20: realloc (vg_replace_malloc.c:1800)
+==38153==    by 0x10F0A9: main (demo.cpp:293)
+==38153==  Block was alloc'd at
+==38153==    at 0x4842788: malloc (vg_replace_malloc.c:446)
+==38153==    by 0x10E8EB: main (demo.cpp:231)
+==38153== 
+==38153== Invalid read of size 8
+==38153==    at 0x109C89: draw(SDL_Renderer*, point*, int, edge*, int, point, point) (graphics.cpp:57)
+==38153==    by 0x10F529: main (demo.cpp:343)
+==38153==  Address 0x1a4a8368 is 104 bytes inside a block of size 720 free'd
+==38153==    at 0x4849E20: realloc (vg_replace_malloc.c:1800)
+==38153==    by 0x10F0A9: main (demo.cpp:293)
+==38153==  Block was alloc'd at
+==38153==    at 0x4842788: malloc (vg_replace_malloc.c:446)
+==38153==    by 0x10E8EB: main (demo.cpp:231)
+==38153== 
+==38153== Invalid read of size 8
+==38153==    at 0x109C95: draw(SDL_Renderer*, point*, int, edge*, int, point, point) (graphics.cpp:57)
+==38153==    by 0x10F529: main (demo.cpp:343)
+==38153==  Address 0x1a4a8370 is 112 bytes inside a block of size 720 free'd
+==38153==    at 0x4849E20: realloc (vg_replace_malloc.c:1800)
+==38153==    by 0x10F0A9: main (demo.cpp:293)
+==38153==  Block was alloc'd at
+==38153==    at 0x4842788: malloc (vg_replace_malloc.c:446)
+==38153==    by 0x10E8EB: main (demo.cpp:231)
+==38153== 
+==38153== Invalid read of size 8
+==38153==    at 0x109CBA: draw(SDL_Renderer*, point*, int, edge*, int, point, point) (graphics.cpp:58)
+==38153==    by 0x10F529: main (demo.cpp:343)
+==38153==  Address 0x1a4a8378 is 120 bytes inside a block of size 720 free'd
+==38153==    at 0x4849E20: realloc (vg_replace_malloc.c:1800)
+==38153==    by 0x10F0A9: main (demo.cpp:293)
+==38153==  Block was alloc'd at
+==38153==    at 0x4842788: malloc (vg_replace_malloc.c:446)
+==38153==    by 0x10E8EB: main (demo.cpp:231)
+==38153== 
+==38153== Invalid read of size 8
+==38153==    at 0x109CBD: draw(SDL_Renderer*, point*, int, edge*, int, point, point) (graphics.cpp:58)
+==38153==    by 0x10F529: main (demo.cpp:343)
+==38153==  Address 0x1a4a8380 is 128 bytes inside a block of size 720 free'd
+==38153==    at 0x4849E20: realloc (vg_replace_malloc.c:1800)
+==38153==    by 0x10F0A9: main (demo.cpp:293)
+==38153==  Block was alloc'd at
+==38153==    at 0x4842788: malloc (vg_replace_malloc.c:446)
+==38153==    by 0x10E8EB: main (demo.cpp:231)
+==38153== 
+==38153== Invalid read of size 8
+==38153==    at 0x109CC9: draw(SDL_Renderer*, point*, int, edge*, int, point, point) (graphics.cpp:58)
+==38153==    by 0x10F529: main (demo.cpp:343)
+==38153==  Address 0x1a4a8388 is 136 bytes inside a block of size 720 free'd
+==38153==    at 0x4849E20: realloc (vg_replace_malloc.c:1800)
+==38153==    by 0x10F0A9: main (demo.cpp:293)
+==38153==  Block was alloc'd at
+==38153==    at 0x4842788: malloc (vg_replace_malloc.c:446)
+==38153==    by 0x10E8EB: main (demo.cpp:231)
+==38153== 
+==38153== Invalid read of size 8
+==38153==    at 0x109CCD: draw(SDL_Renderer*, point*, int, edge*, int, point, point) (graphics.cpp:58)
+==38153==    by 0x10F529: main (demo.cpp:343)
+==38153==  Address 0x1a4a8390 is 144 bytes inside a block of size 720 free'd
+==38153==    at 0x4849E20: realloc (vg_replace_malloc.c:1800)
+==38153==    by 0x10F0A9: main (demo.cpp:293)
+==38153==  Block was alloc'd at
+==38153==    at 0x4842788: malloc (vg_replace_malloc.c:446)
+==38153==    by 0x10E8EB: main (demo.cpp:231)
+==38153== 
+==38153== Invalid read of size 8
+==38153==    at 0x109CD9: draw(SDL_Renderer*, point*, int, edge*, int, point, point) (graphics.cpp:58)
+==38153==    by 0x10F529: main (demo.cpp:343)
+==38153==  Address 0x1a4a8398 is 152 bytes inside a block of size 720 free'd
+==38153==    at 0x4849E20: realloc (vg_replace_malloc.c:1800)
+==38153==    by 0x10F0A9: main (demo.cpp:293)
+==38153==  Block was alloc'd at
+==38153==    at 0x4842788: malloc (vg_replace_malloc.c:446)
+==38153==    by 0x10E8EB: main (demo.cpp:231)
+==38153== 
+--38153-- Discarding syms at 0x56bd020-0x56c1e1e in /usr/lib/libXcursor.so.1.0.2 (have_dinfo 1)
+--38153-- Discarding syms at 0x56dd020-0x56e884b in /usr/lib/libXi.so.6.1.0 (have_dinfo 1)
+--38153-- Discarding syms at 0x56ef020-0x56f5bda in /usr/lib/libXrandr.so.2.2.0 (have_dinfo 1)
+--38153-- Discarding syms at 0x56c8020-0x56ce473 in /usr/lib/libXrender.so.1.3.0 (have_dinfo 1)
+--38153-- Discarding syms at 0x56fb020-0x56fbdbb in /usr/lib/libXss.so.1.0.0 (have_dinfo 1)
+--38153-- Discarding syms at 0x53ed020-0x541acc8 in /usr/lib/libdbus-1.so.3.32.4 (have_dinfo 1)
+==38153== 
+==38153== HEAP SUMMARY:
+==38153==     in use at exit: 832,096 bytes in 3,848 blocks
+==38153==   total heap usage: 121,775 allocs, 117,927 frees, 113,242,135 bytes allocated
+==38153== 
+==38153== Searching for pointers to 3,848 not-freed blocks
+==38153== Checked 4,241,184 bytes
+==38153== 
+==38153== 29 bytes in 1 blocks are definitely lost in loss record 167 of 2,395
+==38153==    at 0x4842788: malloc (vg_replace_malloc.c:446)
+==38153==    by 0x5410954: ???
+==38153==    by 0x53F6BB8: ???
+==38153==    by 0x499BE83: SDL_DBus_Init_Spinlocked.lto_priv.0 (SDL_dbus.c:153)
+==38153==    by 0x489666E: UnknownInlinedFun (SDL_dbus.c:175)
+==38153==    by 0x489666E: SDL_InitSubSystem_REAL.part.0 (SDL.c:198)
+==38153==    by 0x10E7BD: main (demo.cpp:209)
+==38153== 
+==38153== 29 bytes in 1 blocks are definitely lost in loss record 168 of 2,395
+==38153==    at 0x4842788: malloc (vg_replace_malloc.c:446)
+==38153==    by 0x5410954: ???
+==38153==    by 0x53F6B6B: ???
+==38153==    by 0x499BE83: SDL_DBus_Init_Spinlocked.lto_priv.0 (SDL_dbus.c:153)
+==38153==    by 0x489666E: UnknownInlinedFun (SDL_dbus.c:175)
+==38153==    by 0x489666E: SDL_InitSubSystem_REAL.part.0 (SDL.c:198)
+==38153==    by 0x10E7BD: main (demo.cpp:209)
+==38153== 
+==38153== 38 bytes in 1 blocks are definitely lost in loss record 938 of 2,395
+==38153==    at 0x4842788: malloc (vg_replace_malloc.c:446)
+==38153==    by 0x5410954: ???
+==38153==    by 0x53F699A: ???
+==38153==    by 0x499BE83: SDL_DBus_Init_Spinlocked.lto_priv.0 (SDL_dbus.c:153)
+==38153==    by 0x489666E: UnknownInlinedFun (SDL_dbus.c:175)
+==38153==    by 0x489666E: SDL_InitSubSystem_REAL.part.0 (SDL.c:198)
+==38153==    by 0x10E7BD: main (demo.cpp:209)
+==38153== 
+==38153== 72 (24 direct, 48 indirect) bytes in 1 blocks are definitely lost in loss record 2,298 of 2,395
+==38153==    at 0x4842788: malloc (vg_replace_malloc.c:446)
+==38153==    by 0x541835F: ???
+==38153==    by 0x54039F6: ???
+==38153==    by 0x5408C70: ???
+==38153==    by 0x53F6259: ???
+==38153==    by 0x53F64ED: ???
+==38153==    by 0x53F67C2: ???
+==38153==    by 0x499BE83: SDL_DBus_Init_Spinlocked.lto_priv.0 (SDL_dbus.c:153)
+==38153==    by 0x489666E: UnknownInlinedFun (SDL_dbus.c:175)
+==38153==    by 0x489666E: SDL_InitSubSystem_REAL.part.0 (SDL.c:198)
+==38153==    by 0x10E7BD: main (demo.cpp:209)
+==38153== 
+==38153== 520 bytes in 13 blocks are definitely lost in loss record 2,347 of 2,395
+==38153==    at 0x4842788: malloc (vg_replace_malloc.c:446)
+==38153==    by 0x5414248: ???
+==38153==    by 0x540884C: ???
+==38153==    by 0x499BE63: SDL_DBus_Init_Spinlocked.lto_priv.0 (SDL_dbus.c:145)
+==38153==    by 0x489666E: UnknownInlinedFun (SDL_dbus.c:175)
+==38153==    by 0x489666E: SDL_InitSubSystem_REAL.part.0 (SDL.c:198)
+==38153==    by 0x10E7BD: main (demo.cpp:209)
+==38153== 
+==38153== 567 (184 direct, 383 indirect) bytes in 1 blocks are definitely lost in loss record 2,349 of 2,395
+==38153==    at 0x4849BF3: calloc (vg_replace_malloc.c:1675)
+==38153==    by 0x5402D8A: ???
+==38153==    by 0x5404082: ???
+==38153==    by 0x53F5E5B: ???
+==38153==    by 0x53F6227: ???
+==38153==    by 0x53F64ED: ???
+==38153==    by 0x53F67C2: ???
+==38153==    by 0x499BE83: SDL_DBus_Init_Spinlocked.lto_priv.0 (SDL_dbus.c:153)
+==38153==    by 0x489666E: UnknownInlinedFun (SDL_dbus.c:175)
+==38153==    by 0x489666E: SDL_InitSubSystem_REAL.part.0 (SDL.c:198)
+==38153==    by 0x10E7BD: main (demo.cpp:209)
+==38153== 
+==38153== 640 (128 direct, 512 indirect) bytes in 16 blocks are definitely lost in loss record 2,353 of 2,395
+==38153==    at 0x4849E20: realloc (vg_replace_malloc.c:1800)
+==38153==    by 0x10E218: generate_graph(SDL_Renderer*) (demo.cpp:147)
+==38153==    by 0x10F334: main (demo.cpp:310)
+==38153== 
+==38153== 727 (184 direct, 543 indirect) bytes in 1 blocks are definitely lost in loss record 2,355 of 2,395
+==38153==    at 0x4849BF3: calloc (vg_replace_malloc.c:1675)
+==38153==    by 0x5402D8A: ???
+==38153==    by 0x5403BAB: ???
+==38153==    by 0x53F64CD: ???
+==38153==    by 0x53F67C2: ???
+==38153==    by 0x499BE83: SDL_DBus_Init_Spinlocked.lto_priv.0 (SDL_dbus.c:153)
+==38153==    by 0x489666E: UnknownInlinedFun (SDL_dbus.c:175)
+==38153==    by 0x489666E: SDL_InitSubSystem_REAL.part.0 (SDL.c:198)
+==38153==    by 0x10E7BD: main (demo.cpp:209)
+==38153== 
+==38153== 1,551 (552 direct, 999 indirect) bytes in 3 blocks are definitely lost in loss record 2,376 of 2,395
+==38153==    at 0x4849BF3: calloc (vg_replace_malloc.c:1675)
+==38153==    by 0x5402D8A: ???
+==38153==    by 0x5404D1A: ???
+==38153==    by 0x540D073: ???
+==38153==    by 0x540D25C: ???
+==38153==    by 0x540E30E: ???
+==38153==    by 0x540E932: ???
+==38153==    by 0x53F447D: ???
+==38153==    by 0x5408F30: ???
+==38153==    by 0x53F6242: ???
+==38153==    by 0x53F64ED: ???
+==38153==    by 0x53F67C2: ???
+==38153== 
+==38153== 2,280 (872 direct, 1,408 indirect) bytes in 18 blocks are definitely lost in loss record 2,380 of 2,395
+==38153==    at 0x4849E20: realloc (vg_replace_malloc.c:1800)
+==38153==    by 0x10DDEE: get_neighbours(SDL_Renderer*, point, canonical_triangle***) (demo.cpp:106)
+==38153==    by 0x10DECD: generate_graph(SDL_Renderer*) (demo.cpp:120)
+==38153==    by 0x10F334: main (demo.cpp:310)
+==38153== 
+==38153== 2,336 (832 direct, 1,504 indirect) bytes in 17 blocks are definitely lost in loss record 2,381 of 2,395
+==38153==    at 0x4849E20: realloc (vg_replace_malloc.c:1800)
+==38153==    by 0x10DDEE: get_neighbours(SDL_Renderer*, point, canonical_triangle***) (demo.cpp:106)
+==38153==    by 0x10DECD: generate_graph(SDL_Renderer*) (demo.cpp:120)
+==38153==    by 0x10EFA8: main (demo.cpp:267)
+==38153== 
+==38153== 17,472 (760 direct, 16,712 indirect) bytes in 1 blocks are definitely lost in loss record 2,392 of 2,395
+==38153==    at 0x4849BF3: calloc (vg_replace_malloc.c:1675)
+==38153==    by 0x48F8830: UnknownInlinedFun (SDL_malloc.c:5311)
+==38153==    by 0x48F8830: SW_CreateRendererForSurface (SDL_render_sw.c:1003)
+==38153==    by 0x48CE3DF: SDL_CreateRenderer_REAL (SDL_render.c:1009)
+==38153==    by 0x10E877: main (demo.cpp:220)
+==38153== 
+==38153== 524,288 bytes in 1 blocks are possibly lost in loss record 2,395 of 2,395
+==38153==    at 0x4849E20: realloc (vg_replace_malloc.c:1800)
+==38153==    by 0x48F5F27: SDL_realloc_REAL (SDL_malloc.c:5326)
+==38153==    by 0x49BFA63: SDL_AllocateRenderVertices.constprop.0 (SDL_render.c:302)
+==38153==    by 0x48F5761: SW_QueueDrawPoints (SDL_render_sw.c:196)
+==38153==    by 0x48CFC83: UnknownInlinedFun (SDL_render.c:495)
+==38153==    by 0x48CFC83: RenderDrawLineBresenham (SDL_render.c:2901)
+==38153==    by 0x48D0054: RenderDrawLinesWithRectsF (SDL_render.c:2965)
+==38153==    by 0x48D07F5: SDL_RenderDrawLinesF_REAL (SDL_render.c:3046)
+==38153==    by 0x48D0F5C: SDL_RenderDrawLine_REAL (SDL_render.c:2805)
+==38153==    by 0x1097D9: draw_line(SDL_Renderer*, point, point, color) (graphics.cpp:38)
+==38153==    by 0x109AA9: draw(SDL_Renderer*, point*, int, edge*, int, point, point) (graphics.cpp:48)
+==38153==    by 0x10F529: main (demo.cpp:343)
+==38153== 
+==38153== LEAK SUMMARY:
+==38153==    definitely lost: 4,152 bytes in 74 blocks
+==38153==    indirectly lost: 22,109 bytes in 468 blocks
+==38153==      possibly lost: 524,288 bytes in 1 blocks
+==38153==    still reachable: 281,499 bytes in 3,304 blocks
+==38153==         suppressed: 48 bytes in 1 blocks
+==38153== Reachable blocks (those to which a pointer was found) are not shown.
+==38153== To see them, rerun with: --leak-check=full --show-leak-kinds=all
+==38153== 
+==38153== ERROR SUMMARY: 13495 errors from 66 contexts (suppressed: 0 from 0)
+==38153== 
+==38153== 16 errors in context 1 of 66:
+==38153== Invalid read of size 4
+==38153==    at 0x10E2F5: generate_graph(SDL_Renderer*) (demo.cpp:153)
+==38153==    by 0x10F334: main (demo.cpp:310)
+==38153==  Address 0x1a4a8390 is 144 bytes inside a block of size 720 free'd
+==38153==    at 0x4849E20: realloc (vg_replace_malloc.c:1800)
+==38153==    by 0x10F0A9: main (demo.cpp:293)
+==38153==  Block was alloc'd at
+==38153==    at 0x4842788: malloc (vg_replace_malloc.c:446)
+==38153==    by 0x10E8EB: main (demo.cpp:231)
+==38153== 
+==38153== 
+==38153== 16 errors in context 2 of 66:
+==38153== Invalid read of size 8
+==38153==    at 0x10E2DA: generate_graph(SDL_Renderer*) (demo.cpp:153)
+==38153==    by 0x10F334: main (demo.cpp:310)
+==38153==  Address 0x1a4a8388 is 136 bytes inside a block of size 720 free'd
+==38153==    at 0x4849E20: realloc (vg_replace_malloc.c:1800)
+==38153==    by 0x10F0A9: main (demo.cpp:293)
+==38153==  Block was alloc'd at
+==38153==    at 0x4842788: malloc (vg_replace_malloc.c:446)
+==38153==    by 0x10E8EB: main (demo.cpp:231)
+==38153== 
+==38153== 
+==38153== 16 errors in context 3 of 66:
+==38153== Invalid write of size 8
+==38153==    at 0x10E219: generate_graph(SDL_Renderer*) (demo.cpp:147)
+==38153==    by 0x10F334: main (demo.cpp:310)
+==38153==  Address 0x1a4a8388 is 136 bytes inside a block of size 720 free'd
+==38153==    at 0x4849E20: realloc (vg_replace_malloc.c:1800)
+==38153==    by 0x10F0A9: main (demo.cpp:293)
+==38153==  Block was alloc'd at
+==38153==    at 0x4842788: malloc (vg_replace_malloc.c:446)
+==38153==    by 0x10E8EB: main (demo.cpp:231)
+==38153== 
+==38153== 
+==38153== 16 errors in context 4 of 66:
+==38153== Invalid read of size 8
+==38153==    at 0x10E1F3: generate_graph(SDL_Renderer*) (demo.cpp:147)
+==38153==    by 0x10F334: main (demo.cpp:310)
+==38153==  Address 0x1a4a8388 is 136 bytes inside a block of size 720 free'd
+==38153==    at 0x4849E20: realloc (vg_replace_malloc.c:1800)
+==38153==    by 0x10F0A9: main (demo.cpp:293)
+==38153==  Block was alloc'd at
+==38153==    at 0x4842788: malloc (vg_replace_malloc.c:446)
+==38153==    by 0x10E8EB: main (demo.cpp:231)
+==38153== 
+==38153== 
+==38153== 16 errors in context 5 of 66:
+==38153== Invalid read of size 4
+==38153==    at 0x10E1CF: generate_graph(SDL_Renderer*) (demo.cpp:147)
+==38153==    by 0x10F334: main (demo.cpp:310)
+==38153==  Address 0x1a4a8390 is 144 bytes inside a block of size 720 free'd
+==38153==    at 0x4849E20: realloc (vg_replace_malloc.c:1800)
+==38153==    by 0x10F0A9: main (demo.cpp:293)
+==38153==  Block was alloc'd at
+==38153==    at 0x4842788: malloc (vg_replace_malloc.c:446)
+==38153==    by 0x10E8EB: main (demo.cpp:231)
+==38153== 
+==38153== 
+==38153== 16 errors in context 6 of 66:
+==38153== Invalid write of size 4
+==38153==    at 0x10E1CC: generate_graph(SDL_Renderer*) (demo.cpp:147)
+==38153==    by 0x10F334: main (demo.cpp:310)
+==38153==  Address 0x1a4a8390 is 144 bytes inside a block of size 720 free'd
+==38153==    at 0x4849E20: realloc (vg_replace_malloc.c:1800)
+==38153==    by 0x10F0A9: main (demo.cpp:293)
+==38153==  Block was alloc'd at
+==38153==    at 0x4842788: malloc (vg_replace_malloc.c:446)
+==38153==    by 0x10E8EB: main (demo.cpp:231)
+==38153== 
+==38153== 
+==38153== 16 errors in context 7 of 66:
+==38153== Invalid read of size 4
+==38153==    at 0x10E1C6: generate_graph(SDL_Renderer*) (demo.cpp:147)
+==38153==    by 0x10F334: main (demo.cpp:310)
+==38153==  Address 0x1a4a8390 is 144 bytes inside a block of size 720 free'd
+==38153==    at 0x4849E20: realloc (vg_replace_malloc.c:1800)
+==38153==    by 0x10F0A9: main (demo.cpp:293)
+==38153==  Block was alloc'd at
+==38153==    at 0x4842788: malloc (vg_replace_malloc.c:446)
+==38153==    by 0x10E8EB: main (demo.cpp:231)
+==38153== 
+==38153== 
+==38153== 16 errors in context 8 of 66:
+==38153== Invalid read of size 4
+==38153==    at 0x10E199: generate_graph(SDL_Renderer*) (demo.cpp:139)
+==38153==    by 0x10F334: main (demo.cpp:310)
+==38153==  Address 0x1a4a8390 is 144 bytes inside a block of size 720 free'd
+==38153==    at 0x4849E20: realloc (vg_replace_malloc.c:1800)
+==38153==    by 0x10F0A9: main (demo.cpp:293)
+==38153==  Block was alloc'd at
+==38153==    at 0x4842788: malloc (vg_replace_malloc.c:446)
+==38153==    by 0x10E8EB: main (demo.cpp:231)
+==38153== 
+==38153== 
+==38153== 16 errors in context 9 of 66:
+==38153== Invalid read of size 8
+==38153==    at 0x10DB11: get_neighbours(SDL_Renderer*, point, canonical_triangle***) (demo.cpp:81)
+==38153==    by 0x10DECD: generate_graph(SDL_Renderer*) (demo.cpp:120)
+==38153==    by 0x10F334: main (demo.cpp:310)
+==38153==  Address 0x1a4a8380 is 128 bytes inside a block of size 720 free'd
+==38153==    at 0x4849E20: realloc (vg_replace_malloc.c:1800)
+==38153==    by 0x10F0A9: main (demo.cpp:293)
+==38153==  Block was alloc'd at
+==38153==    at 0x4842788: malloc (vg_replace_malloc.c:446)
+==38153==    by 0x10E8EB: main (demo.cpp:231)
+==38153== 
+==38153== 
+==38153== 16 errors in context 10 of 66:
+==38153== Invalid read of size 8
+==38153==    at 0x10DAFC: get_neighbours(SDL_Renderer*, point, canonical_triangle***) (demo.cpp:81)
+==38153==    by 0x10DECD: generate_graph(SDL_Renderer*) (demo.cpp:120)
+==38153==    by 0x10F334: main (demo.cpp:310)
+==38153==  Address 0x1a4a8378 is 120 bytes inside a block of size 720 free'd
+==38153==    at 0x4849E20: realloc (vg_replace_malloc.c:1800)
+==38153==    by 0x10F0A9: main (demo.cpp:293)
+==38153==  Block was alloc'd at
+==38153==    at 0x4842788: malloc (vg_replace_malloc.c:446)
+==38153==    by 0x10E8EB: main (demo.cpp:231)
+==38153== 
+==38153== 
+==38153== 41 errors in context 11 of 66:
+==38153== Invalid read of size 8
+==38153==    at 0x10DF8F: generate_graph(SDL_Renderer*) (demo.cpp:126)
+==38153==    by 0x10F334: main (demo.cpp:310)
+==38153==  Address 0x1a4a8398 is 152 bytes inside a block of size 720 free'd
+==38153==    at 0x4849E20: realloc (vg_replace_malloc.c:1800)
+==38153==    by 0x10F0A9: main (demo.cpp:293)
+==38153==  Block was alloc'd at
+==38153==    at 0x4842788: malloc (vg_replace_malloc.c:446)
+==38153==    by 0x10E8EB: main (demo.cpp:231)
+==38153== 
+==38153== 
+==38153== 41 errors in context 12 of 66:
+==38153== Invalid read of size 8
+==38153==    at 0x10DF83: generate_graph(SDL_Renderer*) (demo.cpp:126)
+==38153==    by 0x10F334: main (demo.cpp:310)
+==38153==  Address 0x1a4a8390 is 144 bytes inside a block of size 720 free'd
+==38153==    at 0x4849E20: realloc (vg_replace_malloc.c:1800)
+==38153==    by 0x10F0A9: main (demo.cpp:293)
+==38153==  Block was alloc'd at
+==38153==    at 0x4842788: malloc (vg_replace_malloc.c:446)
+==38153==    by 0x10E8EB: main (demo.cpp:231)
+==38153== 
+==38153== 
+==38153== 41 errors in context 13 of 66:
+==38153== Invalid read of size 8
+==38153==    at 0x10DF7F: generate_graph(SDL_Renderer*) (demo.cpp:126)
+==38153==    by 0x10F334: main (demo.cpp:310)
+==38153==  Address 0x1a4a8388 is 136 bytes inside a block of size 720 free'd
+==38153==    at 0x4849E20: realloc (vg_replace_malloc.c:1800)
+==38153==    by 0x10F0A9: main (demo.cpp:293)
+==38153==  Block was alloc'd at
+==38153==    at 0x4842788: malloc (vg_replace_malloc.c:446)
+==38153==    by 0x10E8EB: main (demo.cpp:231)
+==38153== 
+==38153== 
+==38153== 41 errors in context 14 of 66:
+==38153== Invalid read of size 8
+==38153==    at 0x10DF74: generate_graph(SDL_Renderer*) (demo.cpp:126)
+==38153==    by 0x10F334: main (demo.cpp:310)
+==38153==  Address 0x1a4a8380 is 128 bytes inside a block of size 720 free'd
+==38153==    at 0x4849E20: realloc (vg_replace_malloc.c:1800)
+==38153==    by 0x10F0A9: main (demo.cpp:293)
+==38153==  Block was alloc'd at
+==38153==    at 0x4842788: malloc (vg_replace_malloc.c:446)
+==38153==    by 0x10E8EB: main (demo.cpp:231)
+==38153== 
+==38153== 
+==38153== 41 errors in context 15 of 66:
+==38153== Invalid read of size 8
+==38153==    at 0x10DF71: generate_graph(SDL_Renderer*) (demo.cpp:126)
+==38153==    by 0x10F334: main (demo.cpp:310)
+==38153==  Address 0x1a4a8378 is 120 bytes inside a block of size 720 free'd
+==38153==    at 0x4849E20: realloc (vg_replace_malloc.c:1800)
+==38153==    by 0x10F0A9: main (demo.cpp:293)
+==38153==  Block was alloc'd at
+==38153==    at 0x4842788: malloc (vg_replace_malloc.c:446)
+==38153==    by 0x10E8EB: main (demo.cpp:231)
+==38153== 
+==38153== 
+==38153== 41 errors in context 16 of 66:
+==38153== Invalid read of size 8
+==38153==    at 0x10DF62: generate_graph(SDL_Renderer*) (demo.cpp:126)
+==38153==    by 0x10F334: main (demo.cpp:310)
+==38153==  Address 0x1a4a8398 is 152 bytes inside a block of size 720 free'd
+==38153==    at 0x4849E20: realloc (vg_replace_malloc.c:1800)
+==38153==    by 0x10F0A9: main (demo.cpp:293)
+==38153==  Block was alloc'd at
+==38153==    at 0x4842788: malloc (vg_replace_malloc.c:446)
+==38153==    by 0x10E8EB: main (demo.cpp:231)
+==38153== 
+==38153== 
+==38153== 41 errors in context 17 of 66:
+==38153== Invalid read of size 8
+==38153==    at 0x10DF56: generate_graph(SDL_Renderer*) (demo.cpp:126)
+==38153==    by 0x10F334: main (demo.cpp:310)
+==38153==  Address 0x1a4a8390 is 144 bytes inside a block of size 720 free'd
+==38153==    at 0x4849E20: realloc (vg_replace_malloc.c:1800)
+==38153==    by 0x10F0A9: main (demo.cpp:293)
+==38153==  Block was alloc'd at
+==38153==    at 0x4842788: malloc (vg_replace_malloc.c:446)
+==38153==    by 0x10E8EB: main (demo.cpp:231)
+==38153== 
+==38153== 
+==38153== 41 errors in context 18 of 66:
+==38153== Invalid read of size 8
+==38153==    at 0x10DF52: generate_graph(SDL_Renderer*) (demo.cpp:126)
+==38153==    by 0x10F334: main (demo.cpp:310)
+==38153==  Address 0x1a4a8388 is 136 bytes inside a block of size 720 free'd
+==38153==    at 0x4849E20: realloc (vg_replace_malloc.c:1800)
+==38153==    by 0x10F0A9: main (demo.cpp:293)
+==38153==  Block was alloc'd at
+==38153==    at 0x4842788: malloc (vg_replace_malloc.c:446)
+==38153==    by 0x10E8EB: main (demo.cpp:231)
+==38153== 
+==38153== 
+==38153== 41 errors in context 19 of 66:
+==38153== Invalid read of size 8
+==38153==    at 0x10DF47: generate_graph(SDL_Renderer*) (demo.cpp:126)
+==38153==    by 0x10F334: main (demo.cpp:310)
+==38153==  Address 0x1a4a8380 is 128 bytes inside a block of size 720 free'd
+==38153==    at 0x4849E20: realloc (vg_replace_malloc.c:1800)
+==38153==    by 0x10F0A9: main (demo.cpp:293)
+==38153==  Block was alloc'd at
+==38153==    at 0x4842788: malloc (vg_replace_malloc.c:446)
+==38153==    by 0x10E8EB: main (demo.cpp:231)
+==38153== 
+==38153== 
+==38153== 41 errors in context 20 of 66:
+==38153== Invalid read of size 8
+==38153==    at 0x10DF44: generate_graph(SDL_Renderer*) (demo.cpp:126)
+==38153==    by 0x10F334: main (demo.cpp:310)
+==38153==  Address 0x1a4a8378 is 120 bytes inside a block of size 720 free'd
+==38153==    at 0x4849E20: realloc (vg_replace_malloc.c:1800)
+==38153==    by 0x10F0A9: main (demo.cpp:293)
+==38153==  Block was alloc'd at
+==38153==    at 0x4842788: malloc (vg_replace_malloc.c:446)
+==38153==    by 0x10E8EB: main (demo.cpp:231)
+==38153== 
+==38153== 
+==38153== 88 errors in context 21 of 66:
+==38153== Invalid read of size 8
+==38153==    at 0x10A586: get_intersect(edge, edge) (algorithms.cpp:72)
+==38153==    by 0x10A8C6: is_visible(point, point, edge*, int) (algorithms.cpp:96)
+==38153==    by 0x10D89A: get_canonical_tri(point, double, double) (demo.cpp:48)
+==38153==    by 0x10DCB9: get_neighbours(SDL_Renderer*, point, canonical_triangle***) (demo.cpp:95)
+==38153==    by 0x10DECD: generate_graph(SDL_Renderer*) (demo.cpp:120)
+==38153==    by 0x10F334: main (demo.cpp:310)
+==38153==  Address 0x1a4a8380 is 128 bytes inside a block of size 720 free'd
+==38153==    at 0x4849E20: realloc (vg_replace_malloc.c:1800)
+==38153==    by 0x10F0A9: main (demo.cpp:293)
+==38153==  Block was alloc'd at
+==38153==    at 0x4842788: malloc (vg_replace_malloc.c:446)
+==38153==    by 0x10E8EB: main (demo.cpp:231)
+==38153== 
+==38153== 
+==38153== 88 errors in context 22 of 66:
+==38153== Invalid read of size 8
+==38153==    at 0x10A575: get_intersect(edge, edge) (algorithms.cpp:71)
+==38153==    by 0x10A8C6: is_visible(point, point, edge*, int) (algorithms.cpp:96)
+==38153==    by 0x10D89A: get_canonical_tri(point, double, double) (demo.cpp:48)
+==38153==    by 0x10DCB9: get_neighbours(SDL_Renderer*, point, canonical_triangle***) (demo.cpp:95)
+==38153==    by 0x10DECD: generate_graph(SDL_Renderer*) (demo.cpp:120)
+==38153==    by 0x10F334: main (demo.cpp:310)
+==38153==  Address 0x1a4a8358 is 88 bytes inside a block of size 720 free'd
+==38153==    at 0x4849E20: realloc (vg_replace_malloc.c:1800)
+==38153==    by 0x10F0A9: main (demo.cpp:293)
+==38153==  Block was alloc'd at
+==38153==    at 0x4842788: malloc (vg_replace_malloc.c:446)
+==38153==    by 0x10E8EB: main (demo.cpp:231)
+==38153== 
+==38153== 
+==38153== 88 errors in context 23 of 66:
+==38153== Invalid read of size 8
+==38153==    at 0x10A545: get_intersect(edge, edge) (algorithms.cpp:67)
+==38153==    by 0x10A8C6: is_visible(point, point, edge*, int) (algorithms.cpp:96)
+==38153==    by 0x10D89A: get_canonical_tri(point, double, double) (demo.cpp:48)
+==38153==    by 0x10DCB9: get_neighbours(SDL_Renderer*, point, canonical_triangle***) (demo.cpp:95)
+==38153==    by 0x10DECD: generate_graph(SDL_Renderer*) (demo.cpp:120)
+==38153==    by 0x10F334: main (demo.cpp:310)
+==38153==  Address 0x1a4a8378 is 120 bytes inside a block of size 720 free'd
+==38153==    at 0x4849E20: realloc (vg_replace_malloc.c:1800)
+==38153==    by 0x10F0A9: main (demo.cpp:293)
+==38153==  Block was alloc'd at
+==38153==    at 0x4842788: malloc (vg_replace_malloc.c:446)
+==38153==    by 0x10E8EB: main (demo.cpp:231)
+==38153== 
+==38153== 
+==38153== 88 errors in context 24 of 66:
+==38153== Invalid read of size 8
+==38153==    at 0x10A535: get_intersect(edge, edge) (algorithms.cpp:66)
+==38153==    by 0x10A8C6: is_visible(point, point, edge*, int) (algorithms.cpp:96)
+==38153==    by 0x10D89A: get_canonical_tri(point, double, double) (demo.cpp:48)
+==38153==    by 0x10DCB9: get_neighbours(SDL_Renderer*, point, canonical_triangle***) (demo.cpp:95)
+==38153==    by 0x10DECD: generate_graph(SDL_Renderer*) (demo.cpp:120)
+==38153==    by 0x10F334: main (demo.cpp:310)
+==38153==  Address 0x1a4a8350 is 80 bytes inside a block of size 720 free'd
+==38153==    at 0x4849E20: realloc (vg_replace_malloc.c:1800)
+==38153==    by 0x10F0A9: main (demo.cpp:293)
+==38153==  Block was alloc'd at
+==38153==    at 0x4842788: malloc (vg_replace_malloc.c:446)
+==38153==    by 0x10E8EB: main (demo.cpp:231)
+==38153== 
+==38153== 
+==38153== 144 errors in context 25 of 66:
+==38153== Invalid read of size 8
+==38153==    at 0x10DA63: get_neighbours(SDL_Renderer*, point, canonical_triangle***) (demo.cpp:76)
+==38153==    by 0x10DECD: generate_graph(SDL_Renderer*) (demo.cpp:120)
+==38153==    by 0x10F334: main (demo.cpp:310)
+==38153==  Address 0x1a4a8398 is 152 bytes inside a block of size 720 free'd
+==38153==    at 0x4849E20: realloc (vg_replace_malloc.c:1800)
+==38153==    by 0x10F0A9: main (demo.cpp:293)
+==38153==  Block was alloc'd at
+==38153==    at 0x4842788: malloc (vg_replace_malloc.c:446)
+==38153==    by 0x10E8EB: main (demo.cpp:231)
+==38153== 
+==38153== 
+==38153== 144 errors in context 26 of 66:
+==38153== Invalid read of size 8
+==38153==    at 0x10DA57: get_neighbours(SDL_Renderer*, point, canonical_triangle***) (demo.cpp:76)
+==38153==    by 0x10DECD: generate_graph(SDL_Renderer*) (demo.cpp:120)
+==38153==    by 0x10F334: main (demo.cpp:310)
+==38153==  Address 0x1a4a8390 is 144 bytes inside a block of size 720 free'd
+==38153==    at 0x4849E20: realloc (vg_replace_malloc.c:1800)
+==38153==    by 0x10F0A9: main (demo.cpp:293)
+==38153==  Block was alloc'd at
+==38153==    at 0x4842788: malloc (vg_replace_malloc.c:446)
+==38153==    by 0x10E8EB: main (demo.cpp:231)
+==38153== 
+==38153== 
+==38153== 144 errors in context 27 of 66:
+==38153== Invalid read of size 8
+==38153==    at 0x10DA53: get_neighbours(SDL_Renderer*, point, canonical_triangle***) (demo.cpp:76)
+==38153==    by 0x10DECD: generate_graph(SDL_Renderer*) (demo.cpp:120)
+==38153==    by 0x10F334: main (demo.cpp:310)
+==38153==  Address 0x1a4a8388 is 136 bytes inside a block of size 720 free'd
+==38153==    at 0x4849E20: realloc (vg_replace_malloc.c:1800)
+==38153==    by 0x10F0A9: main (demo.cpp:293)
+==38153==  Block was alloc'd at
+==38153==    at 0x4842788: malloc (vg_replace_malloc.c:446)
+==38153==    by 0x10E8EB: main (demo.cpp:231)
+==38153== 
+==38153== 
+==38153== 144 errors in context 28 of 66:
+==38153== Invalid read of size 8
+==38153==    at 0x10DA48: get_neighbours(SDL_Renderer*, point, canonical_triangle***) (demo.cpp:76)
+==38153==    by 0x10DECD: generate_graph(SDL_Renderer*) (demo.cpp:120)
+==38153==    by 0x10F334: main (demo.cpp:310)
+==38153==  Address 0x1a4a8380 is 128 bytes inside a block of size 720 free'd
+==38153==    at 0x4849E20: realloc (vg_replace_malloc.c:1800)
+==38153==    by 0x10F0A9: main (demo.cpp:293)
+==38153==  Block was alloc'd at
+==38153==    at 0x4842788: malloc (vg_replace_malloc.c:446)
+==38153==    by 0x10E8EB: main (demo.cpp:231)
+==38153== 
+==38153== 
+==38153== 144 errors in context 29 of 66:
+==38153== Invalid read of size 8
+==38153==    at 0x10DA45: get_neighbours(SDL_Renderer*, point, canonical_triangle***) (demo.cpp:76)
+==38153==    by 0x10DECD: generate_graph(SDL_Renderer*) (demo.cpp:120)
+==38153==    by 0x10F334: main (demo.cpp:310)
+==38153==  Address 0x1a4a8378 is 120 bytes inside a block of size 720 free'd
+==38153==    at 0x4849E20: realloc (vg_replace_malloc.c:1800)
+==38153==    by 0x10F0A9: main (demo.cpp:293)
+==38153==  Block was alloc'd at
+==38153==    at 0x4842788: malloc (vg_replace_malloc.c:446)
+==38153==    by 0x10E8EB: main (demo.cpp:231)
+==38153== 
+==38153== 
+==38153== 152 errors in context 30 of 66:
+==38153== Invalid read of size 8
+==38153==    at 0x10D9ED: get_neighbours(SDL_Renderer*, point, canonical_triangle***) (demo.cpp:75)
+==38153==    by 0x10DECD: generate_graph(SDL_Renderer*) (demo.cpp:120)
+==38153==    by 0x10F334: main (demo.cpp:310)
+==38153==  Address 0x1a4a8370 is 112 bytes inside a block of size 720 free'd
+==38153==    at 0x4849E20: realloc (vg_replace_malloc.c:1800)
+==38153==    by 0x10F0A9: main (demo.cpp:293)
+==38153==  Block was alloc'd at
+==38153==    at 0x4842788: malloc (vg_replace_malloc.c:446)
+==38153==    by 0x10E8EB: main (demo.cpp:231)
+==38153== 
+==38153== 
+==38153== 152 errors in context 31 of 66:
+==38153== Invalid read of size 8
+==38153==    at 0x10D9E1: get_neighbours(SDL_Renderer*, point, canonical_triangle***) (demo.cpp:75)
+==38153==    by 0x10DECD: generate_graph(SDL_Renderer*) (demo.cpp:120)
+==38153==    by 0x10F334: main (demo.cpp:310)
+==38153==  Address 0x1a4a8368 is 104 bytes inside a block of size 720 free'd
+==38153==    at 0x4849E20: realloc (vg_replace_malloc.c:1800)
+==38153==    by 0x10F0A9: main (demo.cpp:293)
+==38153==  Block was alloc'd at
+==38153==    at 0x4842788: malloc (vg_replace_malloc.c:446)
+==38153==    by 0x10E8EB: main (demo.cpp:231)
+==38153== 
+==38153== 
+==38153== 152 errors in context 32 of 66:
+==38153== Invalid read of size 8
+==38153==    at 0x10D9DD: get_neighbours(SDL_Renderer*, point, canonical_triangle***) (demo.cpp:75)
+==38153==    by 0x10DECD: generate_graph(SDL_Renderer*) (demo.cpp:120)
+==38153==    by 0x10F334: main (demo.cpp:310)
+==38153==  Address 0x1a4a8360 is 96 bytes inside a block of size 720 free'd
+==38153==    at 0x4849E20: realloc (vg_replace_malloc.c:1800)
+==38153==    by 0x10F0A9: main (demo.cpp:293)
+==38153==  Block was alloc'd at
+==38153==    at 0x4842788: malloc (vg_replace_malloc.c:446)
+==38153==    by 0x10E8EB: main (demo.cpp:231)
+==38153== 
+==38153== 
+==38153== 152 errors in context 33 of 66:
+==38153== Invalid read of size 8
+==38153==    at 0x10D9D2: get_neighbours(SDL_Renderer*, point, canonical_triangle***) (demo.cpp:75)
+==38153==    by 0x10DECD: generate_graph(SDL_Renderer*) (demo.cpp:120)
+==38153==    by 0x10F334: main (demo.cpp:310)
+==38153==  Address 0x1a4a8358 is 88 bytes inside a block of size 720 free'd
+==38153==    at 0x4849E20: realloc (vg_replace_malloc.c:1800)
+==38153==    by 0x10F0A9: main (demo.cpp:293)
+==38153==  Block was alloc'd at
+==38153==    at 0x4842788: malloc (vg_replace_malloc.c:446)
+==38153==    by 0x10E8EB: main (demo.cpp:231)
+==38153== 
+==38153== 
+==38153== 152 errors in context 34 of 66:
+==38153== Invalid read of size 8
+==38153==    at 0x10D9CF: get_neighbours(SDL_Renderer*, point, canonical_triangle***) (demo.cpp:75)
+==38153==    by 0x10DECD: generate_graph(SDL_Renderer*) (demo.cpp:120)
+==38153==    by 0x10F334: main (demo.cpp:310)
+==38153==  Address 0x1a4a8350 is 80 bytes inside a block of size 720 free'd
+==38153==    at 0x4849E20: realloc (vg_replace_malloc.c:1800)
+==38153==    by 0x10F0A9: main (demo.cpp:293)
+==38153==  Block was alloc'd at
+==38153==    at 0x4842788: malloc (vg_replace_malloc.c:446)
+==38153==    by 0x10E8EB: main (demo.cpp:231)
+==38153== 
+==38153== 
+==38153== 368 errors in context 35 of 66:
+==38153== Invalid read of size 8
+==38153==    at 0x109CD9: draw(SDL_Renderer*, point*, int, edge*, int, point, point) (graphics.cpp:58)
+==38153==    by 0x10F529: main (demo.cpp:343)
+==38153==  Address 0x1a4a8398 is 152 bytes inside a block of size 720 free'd
+==38153==    at 0x4849E20: realloc (vg_replace_malloc.c:1800)
+==38153==    by 0x10F0A9: main (demo.cpp:293)
+==38153==  Block was alloc'd at
+==38153==    at 0x4842788: malloc (vg_replace_malloc.c:446)
+==38153==    by 0x10E8EB: main (demo.cpp:231)
+==38153== 
+==38153== 
+==38153== 368 errors in context 36 of 66:
+==38153== Invalid read of size 8
+==38153==    at 0x109CCD: draw(SDL_Renderer*, point*, int, edge*, int, point, point) (graphics.cpp:58)
+==38153==    by 0x10F529: main (demo.cpp:343)
+==38153==  Address 0x1a4a8390 is 144 bytes inside a block of size 720 free'd
+==38153==    at 0x4849E20: realloc (vg_replace_malloc.c:1800)
+==38153==    by 0x10F0A9: main (demo.cpp:293)
+==38153==  Block was alloc'd at
+==38153==    at 0x4842788: malloc (vg_replace_malloc.c:446)
+==38153==    by 0x10E8EB: main (demo.cpp:231)
+==38153== 
+==38153== 
+==38153== 368 errors in context 37 of 66:
+==38153== Invalid read of size 8
+==38153==    at 0x109CC9: draw(SDL_Renderer*, point*, int, edge*, int, point, point) (graphics.cpp:58)
+==38153==    by 0x10F529: main (demo.cpp:343)
+==38153==  Address 0x1a4a8388 is 136 bytes inside a block of size 720 free'd
+==38153==    at 0x4849E20: realloc (vg_replace_malloc.c:1800)
+==38153==    by 0x10F0A9: main (demo.cpp:293)
+==38153==  Block was alloc'd at
+==38153==    at 0x4842788: malloc (vg_replace_malloc.c:446)
+==38153==    by 0x10E8EB: main (demo.cpp:231)
+==38153== 
+==38153== 
+==38153== 368 errors in context 38 of 66:
+==38153== Invalid read of size 8
+==38153==    at 0x109CBD: draw(SDL_Renderer*, point*, int, edge*, int, point, point) (graphics.cpp:58)
+==38153==    by 0x10F529: main (demo.cpp:343)
+==38153==  Address 0x1a4a8380 is 128 bytes inside a block of size 720 free'd
+==38153==    at 0x4849E20: realloc (vg_replace_malloc.c:1800)
+==38153==    by 0x10F0A9: main (demo.cpp:293)
+==38153==  Block was alloc'd at
+==38153==    at 0x4842788: malloc (vg_replace_malloc.c:446)
+==38153==    by 0x10E8EB: main (demo.cpp:231)
+==38153== 
+==38153== 
+==38153== 368 errors in context 39 of 66:
+==38153== Invalid read of size 8
+==38153==    at 0x109CBA: draw(SDL_Renderer*, point*, int, edge*, int, point, point) (graphics.cpp:58)
+==38153==    by 0x10F529: main (demo.cpp:343)
+==38153==  Address 0x1a4a8378 is 120 bytes inside a block of size 720 free'd
+==38153==    at 0x4849E20: realloc (vg_replace_malloc.c:1800)
+==38153==    by 0x10F0A9: main (demo.cpp:293)
+==38153==  Block was alloc'd at
+==38153==    at 0x4842788: malloc (vg_replace_malloc.c:446)
+==38153==    by 0x10E8EB: main (demo.cpp:231)
+==38153== 
+==38153== 
+==38153== 368 errors in context 40 of 66:
+==38153== Invalid read of size 8
+==38153==    at 0x109C95: draw(SDL_Renderer*, point*, int, edge*, int, point, point) (graphics.cpp:57)
+==38153==    by 0x10F529: main (demo.cpp:343)
+==38153==  Address 0x1a4a8370 is 112 bytes inside a block of size 720 free'd
+==38153==    at 0x4849E20: realloc (vg_replace_malloc.c:1800)
+==38153==    by 0x10F0A9: main (demo.cpp:293)
+==38153==  Block was alloc'd at
+==38153==    at 0x4842788: malloc (vg_replace_malloc.c:446)
+==38153==    by 0x10E8EB: main (demo.cpp:231)
+==38153== 
+==38153== 
+==38153== 368 errors in context 41 of 66:
+==38153== Invalid read of size 8
+==38153==    at 0x109C89: draw(SDL_Renderer*, point*, int, edge*, int, point, point) (graphics.cpp:57)
+==38153==    by 0x10F529: main (demo.cpp:343)
+==38153==  Address 0x1a4a8368 is 104 bytes inside a block of size 720 free'd
+==38153==    at 0x4849E20: realloc (vg_replace_malloc.c:1800)
+==38153==    by 0x10F0A9: main (demo.cpp:293)
+==38153==  Block was alloc'd at
+==38153==    at 0x4842788: malloc (vg_replace_malloc.c:446)
+==38153==    by 0x10E8EB: main (demo.cpp:231)
+==38153== 
+==38153== 
+==38153== 368 errors in context 42 of 66:
+==38153== Invalid read of size 8
+==38153==    at 0x109C85: draw(SDL_Renderer*, point*, int, edge*, int, point, point) (graphics.cpp:57)
+==38153==    by 0x10F529: main (demo.cpp:343)
+==38153==  Address 0x1a4a8360 is 96 bytes inside a block of size 720 free'd
+==38153==    at 0x4849E20: realloc (vg_replace_malloc.c:1800)
+==38153==    by 0x10F0A9: main (demo.cpp:293)
+==38153==  Block was alloc'd at
+==38153==    at 0x4842788: malloc (vg_replace_malloc.c:446)
+==38153==    by 0x10E8EB: main (demo.cpp:231)
+==38153== 
+==38153== 
+==38153== 368 errors in context 43 of 66:
+==38153== Invalid read of size 8
+==38153==    at 0x109C73: draw(SDL_Renderer*, point*, int, edge*, int, point, point) (graphics.cpp:57)
+==38153==    by 0x10F529: main (demo.cpp:343)
+==38153==  Address 0x1a4a8358 is 88 bytes inside a block of size 720 free'd
+==38153==    at 0x4849E20: realloc (vg_replace_malloc.c:1800)
+==38153==    by 0x10F0A9: main (demo.cpp:293)
+==38153==  Block was alloc'd at
+==38153==    at 0x4842788: malloc (vg_replace_malloc.c:446)
+==38153==    by 0x10E8EB: main (demo.cpp:231)
+==38153== 
+==38153== 
+==38153== 368 errors in context 44 of 66:
+==38153== Invalid read of size 8
+==38153==    at 0x109C70: draw(SDL_Renderer*, point*, int, edge*, int, point, point) (graphics.cpp:57)
+==38153==    by 0x10F529: main (demo.cpp:343)
+==38153==  Address 0x1a4a8350 is 80 bytes inside a block of size 720 free'd
+==38153==    at 0x4849E20: realloc (vg_replace_malloc.c:1800)
+==38153==    by 0x10F0A9: main (demo.cpp:293)
+==38153==  Block was alloc'd at
+==38153==    at 0x4842788: malloc (vg_replace_malloc.c:446)
+==38153==    by 0x10E8EB: main (demo.cpp:231)
+==38153== 
+==38153== 
+==38153== 540 errors in context 45 of 66:
+==38153== Invalid read of size 8
+==38153==    at 0x109A67: draw(SDL_Renderer*, point*, int, edge*, int, point, point) (graphics.cpp:48)
+==38153==    by 0x10F529: main (demo.cpp:343)
+==38153==  Address 0x1a4a8398 is 152 bytes inside a block of size 720 free'd
+==38153==    at 0x4849E20: realloc (vg_replace_malloc.c:1800)
+==38153==    by 0x10F0A9: main (demo.cpp:293)
+==38153==  Block was alloc'd at
+==38153==    at 0x4842788: malloc (vg_replace_malloc.c:446)
+==38153==    by 0x10E8EB: main (demo.cpp:231)
+==38153== 
+==38153== 
+==38153== 540 errors in context 46 of 66:
+==38153== Invalid read of size 8
+==38153==    at 0x109A5B: draw(SDL_Renderer*, point*, int, edge*, int, point, point) (graphics.cpp:48)
+==38153==    by 0x10F529: main (demo.cpp:343)
+==38153==  Address 0x1a4a8390 is 144 bytes inside a block of size 720 free'd
+==38153==    at 0x4849E20: realloc (vg_replace_malloc.c:1800)
+==38153==    by 0x10F0A9: main (demo.cpp:293)
+==38153==  Block was alloc'd at
+==38153==    at 0x4842788: malloc (vg_replace_malloc.c:446)
+==38153==    by 0x10E8EB: main (demo.cpp:231)
+==38153== 
+==38153== 
+==38153== 540 errors in context 47 of 66:
+==38153== Invalid read of size 8
+==38153==    at 0x109A57: draw(SDL_Renderer*, point*, int, edge*, int, point, point) (graphics.cpp:48)
+==38153==    by 0x10F529: main (demo.cpp:343)
+==38153==  Address 0x1a4a8388 is 136 bytes inside a block of size 720 free'd
+==38153==    at 0x4849E20: realloc (vg_replace_malloc.c:1800)
+==38153==    by 0x10F0A9: main (demo.cpp:293)
+==38153==  Block was alloc'd at
+==38153==    at 0x4842788: malloc (vg_replace_malloc.c:446)
+==38153==    by 0x10E8EB: main (demo.cpp:231)
+==38153== 
+==38153== 
+==38153== 540 errors in context 48 of 66:
+==38153== Invalid read of size 8
+==38153==    at 0x109A4C: draw(SDL_Renderer*, point*, int, edge*, int, point, point) (graphics.cpp:48)
+==38153==    by 0x10F529: main (demo.cpp:343)
+==38153==  Address 0x1a4a8380 is 128 bytes inside a block of size 720 free'd
+==38153==    at 0x4849E20: realloc (vg_replace_malloc.c:1800)
+==38153==    by 0x10F0A9: main (demo.cpp:293)
+==38153==  Block was alloc'd at
+==38153==    at 0x4842788: malloc (vg_replace_malloc.c:446)
+==38153==    by 0x10E8EB: main (demo.cpp:231)
+==38153== 
+==38153== 
+==38153== 540 errors in context 49 of 66:
+==38153== Invalid read of size 8
+==38153==    at 0x109A49: draw(SDL_Renderer*, point*, int, edge*, int, point, point) (graphics.cpp:48)
+==38153==    by 0x10F529: main (demo.cpp:343)
+==38153==  Address 0x1a4a8378 is 120 bytes inside a block of size 720 free'd
+==38153==    at 0x4849E20: realloc (vg_replace_malloc.c:1800)
+==38153==    by 0x10F0A9: main (demo.cpp:293)
+==38153==  Block was alloc'd at
+==38153==    at 0x4842788: malloc (vg_replace_malloc.c:446)
+==38153==    by 0x10E8EB: main (demo.cpp:231)
+==38153== 
+==38153== 
+==38153== 1175 errors in context 50 of 66:
+==38153== Invalid read of size 8
+==38153==    at 0x10A586: get_intersect(edge, edge) (algorithms.cpp:72)
+==38153==    by 0x10A8C6: is_visible(point, point, edge*, int) (algorithms.cpp:96)
+==38153==    by 0x10D89A: get_canonical_tri(point, double, double) (demo.cpp:48)
+==38153==    by 0x10DDBF: get_neighbours(SDL_Renderer*, point, canonical_triangle***) (demo.cpp:103)
+==38153==    by 0x10DECD: generate_graph(SDL_Renderer*) (demo.cpp:120)
+==38153==    by 0x10F334: main (demo.cpp:310)
+==38153==  Address 0x1a4a8380 is 128 bytes inside a block of size 720 free'd
+==38153==    at 0x4849E20: realloc (vg_replace_malloc.c:1800)
+==38153==    by 0x10F0A9: main (demo.cpp:293)
+==38153==  Block was alloc'd at
+==38153==    at 0x4842788: malloc (vg_replace_malloc.c:446)
+==38153==    by 0x10E8EB: main (demo.cpp:231)
+==38153== 
+==38153== 
+==38153== 1175 errors in context 51 of 66:
+==38153== Invalid read of size 8
+==38153==    at 0x10A575: get_intersect(edge, edge) (algorithms.cpp:71)
+==38153==    by 0x10A8C6: is_visible(point, point, edge*, int) (algorithms.cpp:96)
+==38153==    by 0x10D89A: get_canonical_tri(point, double, double) (demo.cpp:48)
+==38153==    by 0x10DDBF: get_neighbours(SDL_Renderer*, point, canonical_triangle***) (demo.cpp:103)
+==38153==    by 0x10DECD: generate_graph(SDL_Renderer*) (demo.cpp:120)
+==38153==    by 0x10F334: main (demo.cpp:310)
+==38153==  Address 0x1a4a8358 is 88 bytes inside a block of size 720 free'd
+==38153==    at 0x4849E20: realloc (vg_replace_malloc.c:1800)
+==38153==    by 0x10F0A9: main (demo.cpp:293)
+==38153==  Block was alloc'd at
+==38153==    at 0x4842788: malloc (vg_replace_malloc.c:446)
+==38153==    by 0x10E8EB: main (demo.cpp:231)
+==38153== 
+==38153== 
+==38153== 1175 errors in context 52 of 66:
+==38153== Invalid read of size 8
+==38153==    at 0x10A545: get_intersect(edge, edge) (algorithms.cpp:67)
+==38153==    by 0x10A8C6: is_visible(point, point, edge*, int) (algorithms.cpp:96)
+==38153==    by 0x10D89A: get_canonical_tri(point, double, double) (demo.cpp:48)
+==38153==    by 0x10DDBF: get_neighbours(SDL_Renderer*, point, canonical_triangle***) (demo.cpp:103)
+==38153==    by 0x10DECD: generate_graph(SDL_Renderer*) (demo.cpp:120)
+==38153==    by 0x10F334: main (demo.cpp:310)
+==38153==  Address 0x1a4a8378 is 120 bytes inside a block of size 720 free'd
+==38153==    at 0x4849E20: realloc (vg_replace_malloc.c:1800)
+==38153==    by 0x10F0A9: main (demo.cpp:293)
+==38153==  Block was alloc'd at
+==38153==    at 0x4842788: malloc (vg_replace_malloc.c:446)
+==38153==    by 0x10E8EB: main (demo.cpp:231)
+==38153== 
+==38153== 
+==38153== 1175 errors in context 53 of 66:
+==38153== Invalid read of size 8
+==38153==    at 0x10A535: get_intersect(edge, edge) (algorithms.cpp:66)
+==38153==    by 0x10A8C6: is_visible(point, point, edge*, int) (algorithms.cpp:96)
+==38153==    by 0x10D89A: get_canonical_tri(point, double, double) (demo.cpp:48)
+==38153==    by 0x10DDBF: get_neighbours(SDL_Renderer*, point, canonical_triangle***) (demo.cpp:103)
+==38153==    by 0x10DECD: generate_graph(SDL_Renderer*) (demo.cpp:120)
+==38153==    by 0x10F334: main (demo.cpp:310)
+==38153==  Address 0x1a4a8350 is 80 bytes inside a block of size 720 free'd
+==38153==    at 0x4849E20: realloc (vg_replace_malloc.c:1800)
+==38153==    by 0x10F0A9: main (demo.cpp:293)
+==38153==  Block was alloc'd at
+==38153==    at 0x4842788: malloc (vg_replace_malloc.c:446)
+==38153==    by 0x10E8EB: main (demo.cpp:231)
+==38153== 
+--38153-- 
+--38153-- used_suppression:      1 dtv-addr-init /usr/lib/valgrind/default.supp:1575 suppressed: 48 bytes in 1 blocks
+==38153== 
+==38153== ERROR SUMMARY: 13495 errors from 66 contexts (suppressed: 0 from 0)
