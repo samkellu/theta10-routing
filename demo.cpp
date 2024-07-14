@@ -4,6 +4,7 @@
 
 point* points = NULL;
 edge* obstacles = NULL;
+pl_edge* data_edges = NULL;
 const int s = 0;
 const int t = 1;
 int num_points = 2;
@@ -30,7 +31,7 @@ canonical_triangle* get_canonical_tri(point v, double al, double ar) {
 		NULL, 0, NULL
 	};
 
-	edge bisect = {&v, &bisect_end};
+	pl_edge bisect = {v, bisect_end};
 	canonical_triangle* best = (canonical_triangle*) malloc(sizeof(canonical_triangle));
 	*best = {NULL, al, ar, 0};
 	double min_bi_dist = pow(2, 31);
@@ -45,7 +46,8 @@ canonical_triangle* get_canonical_tri(point v, double al, double ar) {
 		double bisect_distance = get_orth_distance(points[j], bisect);
 		if (bisect_distance >= min_bi_dist) continue;
 		// Checks if the vector to the point intersects any walls
-		if (!is_visible(v, points[j], obstacles, num_obstacles)) continue;
+
+		if (!is_visible(v, points[j], data_edges, num_obstacles)) continue;
 
 		best->p = &points[j];
 		best->bisect_distance = bisect_distance;
@@ -61,6 +63,10 @@ canonical_triangle* get_canonical_tri(point v, double al, double ar) {
 	return best;
 }
 
+void print_point(point p) {
+	printf("(%lf %lf)", p.x, p.y);
+}
+
 int get_neighbours(SDL_Renderer* renderer, point v, canonical_triangle*** neighbours) {
 
 	int num_subcones = 0;
@@ -69,8 +75,9 @@ int get_neighbours(SDL_Renderer* renderer, point v, canonical_triangle*** neighb
 	canonical_triangle** to_add = NULL;
 
 	for (int i = 0; i < num_obstacles; i++) {
-		point* p0 = obstacles[i].points[0];
-		point* p1 = obstacles[i].points[1];
+
+		point* p0 = &points[obstacles[i].p_idx[0]];
+		point* p1 = &points[obstacles[i].p_idx[1]];
 		point* end;
 		if (point_equals(v, *p0)) end = p1;
 		else if (point_equals(v, *p1)) end = p0;
@@ -115,7 +122,6 @@ int get_neighbours(SDL_Renderer* renderer, point v, canonical_triangle*** neighb
 void generate_graph(SDL_Renderer* renderer) {
 
 	for (int i = 0; i < num_points; i++) {
-
 		canonical_triangle** neighbours = NULL;
 		int num_neighbours = get_neighbours(renderer, points[i], &neighbours);
 		for (int j = 0; j < num_neighbours; j++) {
@@ -160,7 +166,7 @@ void route(SDL_Renderer* renderer) {
 
 	SDL_SetRenderDrawColor(renderer, 0, 0, 0, 50);
 	SDL_RenderClear(renderer);
-	draw(renderer, points, num_points, obstacles, num_obstacles, points[s], points[t]);
+	draw(renderer, points, num_points, data_edges, num_obstacles, points[s], points[t]);
 
 	point cur_point = points[s];
 	int max_steps = 20;
@@ -232,36 +238,41 @@ int main() {
 
 	for (int i = 0; i < NUM_OBSTACLES; i++) {
 		bool valid = true;
-		edge e;
+		pl_edge e;
 		point p1, p2;
 		do {
 			p1 = {(double) (rand() % 1000), (double) (rand() % 1000), NULL, 0, NULL};
 			p2 = {(double) (rand() % 1000), (double) (rand() % 1000), NULL, 0, NULL};
-			e = {&p1, &p2};
+			e = {p1, p2};
 
 			for (int j = 0; j < i; j++) {
-				valid = get_intersect(e,  obstacles[j]).x == -1;
+				pl_edge r = {points[obstacles[j].p_idx[0]], points[obstacles[j].p_idx[1]]};
+				valid = get_intersect(e, r).x == -1;
 				if (!valid) break;
 			}
 		} while (!valid);
 
 		points[num_points++] = p1;
 		points[num_points++] = p2;
-		obstacles[i].points[0] = &points[num_points - 2];
-		obstacles[i].points[1] = &points[num_points - 1];
+		obstacles[i].p_idx[0] = num_points - 2;
+		obstacles[i].p_idx[1] = num_points - 1;
 		points[num_points - 2].obstacle_endpoint = &points[num_points - 1];
 		points[num_points - 1].obstacle_endpoint = &points[num_points - 2];
 	}
 
 	num_obstacles = NUM_OBSTACLES;
-	edge st;
+	data_edges = (pl_edge*) malloc(sizeof(pl_edge) * num_obstacles);
+	for (int i = 0; i < num_obstacles; i++) {
+		data_edges[i].points[0] = points[obstacles[i].p_idx[0]];
+		data_edges[i].points[1] = points[obstacles[i].p_idx[1]];
+	}
+
 	do {
 
 		points[s] = {(double) (rand() % 1000), (double) (rand() % 1000), NULL, 0, NULL};
 		points[t] = {(double) (rand() % 1000), (double) (rand() % 1000), NULL, 0, NULL};
-		st = {&points[s], &points[t]};
 
-	} while (!is_visible(points[s], points[t], obstacles, num_obstacles)
+	} while (!is_visible(points[s], points[t], data_edges, num_obstacles)
 			 || sqrt(pow(points[s].x - points[t].x, 2) + pow(points[s].y - points[t].y, 2)) < 600);
 
 	generate_graph(renderer);
@@ -289,7 +300,6 @@ int main() {
 					SDL_GetMouseState(&mx, &my);
 					dispose_graph();
 
-					printf("%d %d\n", num_points, num_obstacles);
 					points = (point*) realloc(points, sizeof(point) * (num_points + 1));
 					points[num_points] = {(double) mx, (double) my, NULL, 0, NULL};
 					if  (e.button.button == SDL_BUTTON_RIGHT) {
@@ -297,9 +307,15 @@ int main() {
 							points[obstacle_prev_idx].obstacle_endpoint = &points[num_points];
 							points[num_points].obstacle_endpoint = &points[obstacle_prev_idx];
 							obstacles = (edge*) realloc(obstacles, sizeof(edge) * (num_obstacles + 1));
-							obstacles[num_obstacles++] = {&points[obstacle_prev_idx], &points[num_points]};
-							printf("(%lf %lf), (%lf %lf)\n", obstacles[num_obstacles - 1].points[0]->x, obstacles[num_obstacles - 1].points[0]->y,  obstacles[num_obstacles - 1].points[1]->x,obstacles[num_obstacles - 1].points[1]->y);
+							obstacles[num_obstacles++] = {obstacle_prev_idx, num_points};
 							obstacle_prev_idx = -1;
+							if (data_edges) free(data_edges);
+
+							data_edges = (pl_edge*) malloc(sizeof(pl_edge) * num_obstacles);
+							for (int i = 0; i < num_obstacles; i++) {
+								data_edges[i].points[0] = points[obstacles[i].p_idx[0]];
+								data_edges[i].points[1] = points[obstacles[i].p_idx[1]];
+							}
 
 						} else {
 							obstacle_prev_idx = num_points;
@@ -315,14 +331,12 @@ int main() {
 						case SDLK_s:
 							dispose_graph();
 							points[s] = {(double) mx, (double) my, NULL, 0, NULL};
-							st.points[0] = &points[s];
 							generate_graph(renderer);
 							break;
 
 						case SDLK_t:
 							dispose_graph();
 							points[t] = {(double) mx, (double) my, NULL, 0, NULL};
-							st.points[1] = &points[t];
 							generate_graph(renderer);
 							break;
 
@@ -334,23 +348,24 @@ int main() {
 			}
 		}
 
-		// point p = {(double) mx, (double) my, NULL, 0, NULL};
-		// p.num_neighbours = get_neighbours(renderer, p, &p.neighbours);
+		point p = {(double) mx, (double) my, NULL, 0, NULL};
+		p.num_neighbours = get_neighbours(renderer, p, &p.neighbours);
 
 		SDL_SetRenderDrawColor(renderer, 0, 0, 0, 50);
 		SDL_RenderClear(renderer);
 
-		draw(renderer, points, num_points, obstacles, num_obstacles, points[s], points[t]);
-		// for (int j = 0; j < p.num_neighbours; j++) {
-            // draw_line(renderer, p, *p.neighbours[j]->p, {100, 100, 100, 100});
-        // }
-		SDL_RenderPresent(renderer);
+		draw(renderer, points, num_points, data_edges, num_obstacles, points[s], points[t]);
+		for (int j = 0; j < p.num_neighbours; j++) {
+            draw_line(renderer, p, *p.neighbours[j]->p, {100, 100, 100, 100});
+        }
 
-		// free(p.neighbours);
+		SDL_RenderPresent(renderer);
+		free(p.neighbours);
 	}
 
 	free(points);
 	free(obstacles);
+	free(data_edges);
     SDL_DestroyWindow(win);
     SDL_Quit();
     return 0;

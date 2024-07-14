@@ -35,7 +35,11 @@ struct canonical_triangle {
 };
 
 struct edge {
-	point* points[2];
+	int p_idx[2];
+};
+
+struct pl_edge {
+	point points[2];
 };
 
 struct cone {

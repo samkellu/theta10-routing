@@ -18,12 +18,15 @@ double get_angle(vec2 v1, vec2 v2)
 	return atan2(cross(v1, v2), dot(v1, v2));
 }
 
-point orth_project(point v, edge edge) {
-	double recip_m = -(edge.points[1]->x - edge.points[0]->x) / (edge.points[1]->y - edge.points[0]->y);
-	double m = (edge.points[1]->y - edge.points[0]->y) / (edge.points[1]->x - edge.points[0]->x);
+point orth_project(point v, pl_edge edge) {
+
+	point p0 = edge.points[0];
+	point p1 = edge.points[1];
+	double recip_m = -(p1.x - p0.x) / (p1.y - p0.y);
+	double m = (p1.y - p0.y) / (p1.x - p0.x);
 
 	double recip_b = v.y - recip_m * v.x;
-	double b = edge.points[0]->y - m * edge.points[0]->x;
+	double b = p0.y - m * p0.x;
 
 	double x = recip_b / (m - recip_m) - b / (m - recip_m);
 	double y = m * x + b;
@@ -31,25 +34,25 @@ point orth_project(point v, edge edge) {
 	return {x, y};
 }
 
-double get_orth_distance(point v, edge edge) {
+double get_orth_distance(point v, pl_edge edge) {
 	
 	point projected = orth_project(v, edge);
-	return sqrt(pow(edge.points[0]->y - projected.y, 2) + pow(edge.points[0]->x - projected.x, 2));
+	return sqrt(pow(edge.points[0].y - projected.y, 2) + pow(edge.points[0].x - projected.x, 2));
 }
 
-double get_distance_from_edge(point v, edge edge) {
+double get_distance_from_edge(point v, pl_edge edge) {
 	
 	point projected = orth_project(v, edge);
 	// check projected hit is on the line at all
 
-	point high_x = *edge.points[0];
-	point low_x = *edge.points[1];
+	point high_x = edge.points[0];
+	point low_x = edge.points[1];
 	if (low_x.x > high_x.x)
-		high_x = *edge.points[1];
-		low_x = *edge.points[0];
+		high_x = edge.points[1];
+		low_x = edge.points[0];
 
-	double x_max = std::max(edge.points[0]->x, edge.points[1]->x); 
-	double x_min = std::min(edge.points[0]->x, edge.points[1]->x);
+	double x_max = std::max(edge.points[0].x, edge.points[1].x); 
+	double x_min = std::min(edge.points[0].x, edge.points[1].x);
 
 	if (projected.x > high_x.x) {
 		return sqrt(pow(v.y - high_x.y, 2) + pow(v.x - high_x.x, 2));
@@ -61,17 +64,17 @@ double get_distance_from_edge(point v, edge edge) {
 	return sqrt(pow(v.y - projected.y, 2) + pow(v.x - projected.x, 2));
 }
 
-point get_intersect(edge l1, edge l2) {
+point get_intersect(pl_edge l1, pl_edge l2) {
 
-	double x[] = {l2.points[0]->x,
-				  l2.points[1]->x,
-				  l1.points[0]->x,
-				  l1.points[1]->x};
+	double x[] = {l2.points[0].x,
+				  l2.points[1].x,
+				  l1.points[0].x,
+				  l1.points[1].x};
 
-	double y[] = {l2.points[0]->y,
-				  l2.points[1]->y,
-				  l1.points[0]->y,
-				  l1.points[1]->y};
+	double y[] = {l2.points[0].y,
+				  l2.points[1].y,
+				  l1.points[0].y,
+				  l1.points[1].y};
 
 	double denominator = (x[0]-x[1])*(y[2]-y[3])-(y[0]-y[1])*(x[2]-x[3]);
 
@@ -87,12 +90,12 @@ point get_intersect(edge l1, edge l2) {
 	return { x[0] + t * (x[1] - x[0]), y[0] + t * (y[1] - y[0]) };
 }
 
-bool is_visible(point observer, point pt, edge obstacles[], int n) {
+bool is_visible(point observer, point pt, pl_edge* obstacles, int num_obstacles) {
 
-	edge vis_edge = {&observer, &pt};
+	pl_edge vis_edge = {observer, pt};
 	double distance = sqrt(pow(observer.x - pt.x, 2) + pow(observer.y - pt.y, 2));
 
-	for (int i = 0; i < n; i++) {
+	for (int i = 0; i < num_obstacles; i++) {
 		point hit = get_intersect(vis_edge, obstacles[i]);
 		double hit_dist = sqrt(pow(hit.y - observer.y, 2) + pow(hit.x - observer.x, 2));
 		if (hit_dist <= distance) return false;
@@ -168,7 +171,7 @@ canonical_triangle* find_bisect(SDL_Renderer* renderer, point cur_point, point c
 	return best;
 }
 
-canonical_triangle* closest_to_st(point cur_point, edge st, bool use_side = false, double al = -PI, double ar = PI, point* cur_proj = NULL) {
+canonical_triangle* closest_to_st(point cur_point, pl_edge st, bool use_side = false, double al = -PI, double ar = PI, point* cur_proj = NULL) {
 
 	double best_dist = pow(2, 31);
 	canonical_triangle* best_neighbour = NULL;
@@ -176,8 +179,8 @@ canonical_triangle* closest_to_st(point cur_point, edge st, bool use_side = fals
 		canonical_triangle* neighbour = cur_point.neighbours[i];
 
 		if (use_side) {
-			point s = *st.points[0];
-			point t = *st.points[1];
+			point s = st.points[0];
+			point t = st.points[1];
 
 			vec2 proj_to_t = {t.x - cur_proj->x, t.y - cur_proj->y};
 			vec2 proj_to_neighbour = { neighbour->p->x - cur_proj->x, neighbour->p->y - cur_proj->y};
@@ -197,7 +200,7 @@ canonical_triangle* closest_to_st(point cur_point, edge st, bool use_side = fals
 
 canonical_triangle* bisect_alg(SDL_Renderer* renderer, point cur_point, point s, point t) {
 
-	edge e = {&s, &t};
+	pl_edge e = {s, t};
 	if (cur_point.x == s.x && cur_point.y == s.y)
 		return closest_to_st(cur_point, e);
 
@@ -314,7 +317,7 @@ canonical_triangle* find_cone(SDL_Renderer* renderer, point cur_point, point cur
 
 canonical_triangle* cone_alg(SDL_Renderer* renderer, point cur_point, point s, point t) {
 
-	edge e = {&s, &t};
+	pl_edge e = {s, t};
 	if (cur_point.x == s.x && cur_point.y == s.y)
 		return closest_to_st(cur_point, e);
 
@@ -354,7 +357,7 @@ canonical_triangle* cone_alg(SDL_Renderer* renderer, point cur_point, point s, p
 
 canonical_triangle* low_angle_alg(SDL_Renderer* renderer, point cur_point, point s, point t) {
 
-	edge e = {&s, &t};
+	pl_edge e = {s, t};
 	canonical_triangle* best = NULL;
 
 	double best_angle = 360;
