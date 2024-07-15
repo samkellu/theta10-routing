@@ -7,7 +7,10 @@
 
 #define PI 3.14159
 #define CONE_LENGTH 2000
+
+#ifndef NUM_CONES
 #define NUM_CONES 10
+#endif
 
 #ifdef RANDOM_START
 #define NUM_OBSTACLES 8
