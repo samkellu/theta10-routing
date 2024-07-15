@@ -5,12 +5,15 @@
 #include <stdlib.h>
 #include <time.h>
 
+#define PI 3.14159
 #define CONE_LENGTH 2000
 #define NUM_CONES 10
-#define NUM_POINTS 25
+
+#ifdef RANDOM_START
 #define NUM_OBSTACLES 8
-#define PI 3.14159
-#define RANDOM_START 1
+#else
+#define NUM_OBSTACLES 0
+#endif
 
 struct canonical_triangle;
 
